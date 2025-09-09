@@ -8,8 +8,6 @@ if hasattr(sys, 'set_int_max_str_digits'):
     sys.set_int_max_str_digits(10_000_000)
 
 # ================= Q1 =================
-sys.set_int_max_str_digits(20000)
-
 def kaprekar_num(n: int) -> int:
     num = 0
     for i in range(1, n + 1):
@@ -18,22 +16,29 @@ def kaprekar_num(n: int) -> int:
         num = num * (10 ** len(str(i))) + i
     return num
 
-def q1_stream():
+def q1_stream(start: int = 10, end: int = 300):
     start_time = time.time()
-    for n in range(10, 300):
+    found = False
+
+    for n in range(start, end + 1):
         candidate = kaprekar_num(n)
         elapsed = round(time.time() - start_time, 2)
 
-        # progress update
-        yield f"data: {{\"current_n\": {n}, \"runtime_seconds\": {elapsed}}}\n\n"
+        # progress update (valid JSON)
+        yield f'data: {{"current_check": {n}, "runtime_seconds": {elapsed}}}\n\n'
 
-        # found prime
         if gmpy2.is_prime(candidate):
-            yield f"data: {{\"found\": true, \"n\": {n}, \"kaprekar_number\": \"{candidate}\", \"runtime_seconds\": {elapsed}}}\n\n"
+            yield f'data: {{"found": true, "n": {n}, "kaprekar_number": "{candidate}", "runtime_seconds": {elapsed}}}\n\n'
+            found = True
             break
 
+    if not found:
+        elapsed = round(time.time() - start_time, 2)
+        yield f'data: {{"not_found": true, "runtime_seconds": {elapsed}}}\n\n'
+
+
 # ================= Q2 =================
-from sympy import isprime
+
 
 def q2(max_primes=5):
     """

@@ -7,10 +7,13 @@ CORS(app)
 
 @app.route("/q1/stream")
 def route_q1():
+    start = request.args.get("start", default=10, type=int)
+    end = request.args.get("end", default=300, type=int)
+
     def event_stream():
-        # delegate to your generator in controllers/questionCodes.py
-        for chunk in questions.q1_stream():
+        for chunk in questions.q1_stream(start, end):
             yield chunk
+
     return Response(event_stream(), mimetype="text/event-stream")
 
 @app.route("/q2")

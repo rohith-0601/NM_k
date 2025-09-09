@@ -7,6 +7,8 @@ function Q1() {
   const [loading, setLoading] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [currentCheck, setCurrentCheck] = useState(null);
+  const [start, setStart] = useState(1000);
+  const [end, setEnd] = useState(3000);
 
   const runCode = () => {
     setLoading(true);
@@ -19,13 +21,21 @@ function Q1() {
       setElapsedTime((prev) => prev + 1);
     }, 1000);
 
-    const eventSource = new EventSource("http://127.0.0.1:8000/q1/stream");
+    // Pass start and end as query params
+    const eventSource = new EventSource(
+      `http://127.0.0.1:8000/q1/stream?start=${start}&end=${end}`
+    );
 
     eventSource.onmessage = (e) => {
       const data = JSON.parse(e.data);
 
       if (data.found) {
         setOutput(data);
+        setLoading(false);
+        clearInterval(timerId);
+        eventSource.close();
+      } else if (data.not_found) {
+        setOutput({ message: "No prime found in given range" });
         setLoading(false);
         clearInterval(timerId);
         eventSource.close();
@@ -69,9 +79,7 @@ function Q1() {
                   key={q}
                   to={`/q${q}`}
                   className={({ isActive }) =>
-                    `nav-link ${
-                      isActive ? "fw-bold text-danger" : "text-dark"
-                    }`
+                    `nav-link ${isActive ? "fw-bold text-danger" : "text-dark"}`
                   }
                 >
                   Q{q}
@@ -101,6 +109,26 @@ function Q1() {
                   next number that follows this pattern. That number n lies
                   between 1000 and 3000.
                 </p>
+
+                {/* Inputs for range */}
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Start</label>
+                  <input
+                    type="number"
+                    value={start}
+                    onChange={(e) => setStart(e.target.value)}
+                    className="form-control"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-bold">End</label>
+                  <input
+                    type="number"
+                    value={end}
+                    onChange={(e) => setEnd(e.target.value)}
+                    className="form-control"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -127,7 +155,7 @@ function Q1() {
                     borderRadius: "8px",
                   }}
                 >
-{`def build_kaprekar(num_limit: int) -> int:
+                  {`def build_kaprekar(num_limit: int) -> int:
     num = 0
     for i in range(1, num_limit + 1):
         num = num * (10 ** len(str(i))) + i
@@ -135,9 +163,9 @@ function Q1() {
         num = num * (10 ** len(str(i))) + i
     return num
 
-def stream_q1():
+def stream_q1(start, end):
     start_time = time.time()
-    for num_limit in range(1000, 3001):
+    for num_limit in range(start, end + 1):
         kap_number = build_kaprekar(num_limit)
         elapsed_time = round(time.time() - start_time, 2)
         yield f"data: {{'current_check': {num_limit}, 'elapsed_time': {elapsed_time}}}\\n\\n"
@@ -198,13 +226,13 @@ def stream_q1():
                         borderRadius: "8px",
                       }}
                     >
-                      <p>{JSON.stringify(output.n, null, 2)}</p>
-                      {JSON.stringify(output.kaprekar_number, null, 2)}
-                      <p>Runtime {JSON.stringify(output.runtime_seconds, null, 2)}</p><br/>
+                      {JSON.stringify(output.message, null, 2)}
                     </pre>
                   )
                 ) : (
-                  <p className="text-muted">Click "Run Code" to start streaming.</p>
+                  <p className="text-muted">
+                    Click "Run Code" to start streaming.
+                  </p>
                 )}
               </div>
             </div>
