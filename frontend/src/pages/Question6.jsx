@@ -56,15 +56,17 @@ Show the number of digits and the number itself.`;
   return (
     <div
       className="min-vh-100 d-flex flex-column"
-      style={{ background: "linear-gradient(135deg, #eef6ff, #f9fbff)" }}
+      style={{ background: "linear-gradient(135deg, #f8f1df, #f0e4c3)" }}
     >
       {/* Navbar */}
       <nav
         className="navbar navbar-expand-lg navbar-light shadow-sm"
-        style={{ background: "linear-gradient(90deg, #0d6efd, #4ba3ff)" }}
+        style={{
+          background: "linear-gradient(90deg, #d9a066, #f2c97d)",
+        }}
       >
         <div className="container-fluid">
-          <a className="navbar-brand fw-bold text-white" href="/">
+          <a className="navbar-brand fw-bold text-dark" href="/">
             Prime Assignment
           </a>
           <button
@@ -77,7 +79,7 @@ Show the number of digits and the number itself.`;
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
             <div className="navbar-nav ms-auto">
-              <NavLink to="/" className="nav-link text-white">
+              <NavLink to="/" className="nav-link text-dark">
                 Home
               </NavLink>
               {[1, 2, 3, 4, 5, 6, 7].map((q) => (
@@ -86,7 +88,7 @@ Show the number of digits and the number itself.`;
                   to={`/q${q}`}
                   className={({ isActive }) =>
                     `nav-link ${
-                      isActive ? "fw-bold text-warning" : "text-white"
+                      isActive ? "fw-bold text-danger" : "text-dark"
                     }`
                   }
                 >
@@ -100,14 +102,17 @@ Show the number of digits and the number itself.`;
 
       {/* Question Content */}
       <div className="container my-5">
-        <h2 className="fw-bold text-center text-primary mb-4">Question 6</h2>
+        <h2 className="fw-bold text-center text-dark mb-4">Question 6</h2>
         <p className="lead text-muted text-center mb-5">{questionText}</p>
 
         <div className="row g-4">
           {/* Question Box (Left) */}
           <div className="col-12 col-lg-6">
             <div className="card shadow-lg border-0 h-100 rounded-4">
-              <div className="card-header bg-primary text-white fw-bold">
+              <div
+                className="card-header text-dark fw-bold"
+                style={{ backgroundColor: "#f2c97d" }}
+              >
                 Question
               </div>
               <div className="card-body">
@@ -119,24 +124,35 @@ Show the number of digits and the number itself.`;
           {/* Code + Output (Right) */}
           <div className="col-12 col-lg-6 d-flex flex-column gap-4">
             {/* Code Box */}
-            <div className="card shadow-lg border-0 rounded-4">
-              <div className="card-header bg-primary text-white fw-bold">
+            <div className="card shadow-lg border-0 rounded-4 flex-fill">
+              <div
+                className="card-header text-dark fw-bold"
+                style={{ backgroundColor: "#c9a563" }}
+              >
                 Code
               </div>
-              <div className="card-body text-start">
+              <div className="card-body text-start d-flex flex-column">
                 <pre
                   style={{
+                    flexGrow: 1,
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
                     fontSize: "0.9rem",
+                    background: "#fffaf0",
+                    padding: "1rem",
+                    borderRadius: "8px",
                   }}
                 >
                   {pythonCode}
                 </pre>
                 <button
-                  className="btn btn-success mt-3"
+                  className="btn mt-3 align-self-end"
                   onClick={handleRunCode}
                   disabled={loading}
+                  style={{
+                    background: "linear-gradient(145deg, #cb7d5f, #ae705a)",
+                    color: "#fffaf0",
+                  }}
                 >
                   {loading ? "Running..." : "Run Code"}
                 </button>
@@ -144,15 +160,18 @@ Show the number of digits and the number itself.`;
             </div>
 
             {/* Output Box */}
-            <div className="card shadow-lg border-0 rounded-4">
-              <div className="card-header bg-primary text-white fw-bold">
+            <div className="card shadow-lg border-0 rounded-4 flex-fill">
+              <div
+                className="card-header text-dark fw-bold"
+                style={{ backgroundColor: "rgba(176, 137, 66, 1)" }}
+              >
                 Output
               </div>
               <div className="card-body">
                 {loading ? (
                   <div className="d-flex align-items-center">
                     <div
-                      className="spinner-border text-primary me-3"
+                      className="spinner-border text-danger me-3"
                       role="status"
                     ></div>
                     <span>Processing... ({time}s)</span>
@@ -165,7 +184,7 @@ Show the number of digits and the number itself.`;
                         style={{
                           marginBottom: "0.5rem",
                           padding: "0.5rem",
-                          background: "#f1f1f1",
+                          background: "#fffaf0",
                           borderRadius: "6px",
                           fontFamily: "monospace",
                         }}

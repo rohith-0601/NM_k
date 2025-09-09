@@ -11,7 +11,6 @@ const Question7 = () => {
   const [loading, setLoading] = useState(false);
   const [time, setTime] = useState(0);
 
-  // Timer
   useEffect(() => {
     let timer;
     if (loading) {
@@ -21,7 +20,6 @@ const Question7 = () => {
     return () => clearInterval(timer);
   }, [loading]);
 
-  // Run Code handler
   const handleRunCode = async () => {
     setLoading(true);
     setOutput(null);
@@ -59,15 +57,15 @@ result = {
   return (
     <div
       className="min-vh-100 d-flex flex-column"
-      style={{ background: "linear-gradient(135deg, #eef6ff, #f9fbff)" }}
+      style={{ background: "linear-gradient(135deg, #f8f1df, #f0e4c3)" }}
     >
       {/* Navbar */}
       <nav
-        className="navbar navbar-expand-lg navbar-light shadow-sm"
-        style={{ background: "linear-gradient(90deg, #0d6efd, #4ba3ff)" }}
+        className="navbar navbar-expand-lg shadow-sm"
+        style={{ background: "linear-gradient(90deg, #d9a066, #f2c97d)" }}
       >
         <div className="container-fluid">
-          <a className="navbar-brand fw-bold text-white" href="/">
+          <a className="navbar-brand fw-bold text-dark" href="/">
             Prime Assignment
           </a>
           <button
@@ -85,7 +83,7 @@ result = {
                   key={q}
                   to={`/q${q}`}
                   className={({ isActive }) =>
-                    `nav-link ${isActive ? "fw-bold text-warning" : "text-white"}`
+                    `nav-link ${isActive ? "fw-bold text-danger" : "text-dark"}`
                   }
                 >
                   Q{q}
@@ -96,16 +94,19 @@ result = {
         </div>
       </nav>
 
-      {/* Question Content */}
+      {/* Content */}
       <div className="container my-5">
-        <h2 className="fw-bold text-center text-primary mb-4">Question 7</h2>
+        <h2 className="fw-bold text-center text-dark mb-4">Question 7</h2>
         <p className="lead text-muted text-center mb-5">{questionText}</p>
 
         <div className="row g-4">
-          {/* Question Box (Left) */}
+          {/* Question Box */}
           <div className="col-12 col-lg-6">
             <div className="card shadow-lg border-0 h-100 rounded-4">
-              <div className="card-header bg-primary text-white fw-bold">
+              <div
+                className="card-header fw-bold"
+                style={{ background: "#f2c97d", color: "#000" }}
+              >
                 Question
               </div>
               <div className="card-body">
@@ -122,14 +123,17 @@ result = {
             </div>
           </div>
 
-          {/* Code + Output (Right) */}
+          {/* Code + Output */}
           <div className="col-12 col-lg-6 d-flex flex-column gap-4">
             {/* Code Box */}
             <div className="card shadow-lg border-0 rounded-4">
-              <div className="card-header bg-primary text-white fw-bold">
+              <div
+                className="card-header fw-bold"
+                style={{ background: "#c9a563", color: "#fffaf0" }}
+              >
                 Code
               </div>
-              <div className="card-body text-start">
+              <div className="card-body text-start" style={{ background: "#fffaf0" }}>
                 <pre
                   style={{
                     whiteSpace: "pre-wrap",
@@ -140,7 +144,11 @@ result = {
                   {pythonCode}
                 </pre>
                 <button
-                  className="btn btn-success mt-3"
+                  className="btn mt-3"
+                  style={{
+                    background: "linear-gradient(145deg, #cb7d5f, #ae705a)",
+                    color: "#fffaf0",
+                  }}
                   onClick={handleRunCode}
                   disabled={loading}
                 >
@@ -151,14 +159,17 @@ result = {
 
             {/* Output Box */}
             <div className="card shadow-lg border-0 rounded-4">
-              <div className="card-header bg-primary text-white fw-bold">
+              <div
+                className="card-header fw-bold"
+                style={{ background: "rgba(176, 137, 66, 1)", color: "#fffaf0" }}
+              >
                 Output
               </div>
-              <div className="card-body">
+              <div className="card-body" style={{ background: "#fffaf0" }}>
                 {loading ? (
                   <div className="d-flex align-items-center">
                     <div
-                      className="spinner-border text-primary me-3"
+                      className="spinner-border text-danger me-3"
                       role="status"
                     ></div>
                     <span>Processing... ({time}s)</span>
