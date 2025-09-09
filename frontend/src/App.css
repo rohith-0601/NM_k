@@ -1,0 +1,17 @@
+.nav-link {
+  color: black !important;
+  margin: 0 5px;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.nav-link:hover {
+  color: #0d6efd !important; /* bootstrap blue */
+}
+
+.active-link {
+  background-color: #0d6efd !important;
+  color: white !important;
+  border-radius: 6px;
+  padding: 5px 10px;
+}

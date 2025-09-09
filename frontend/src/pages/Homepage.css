@@ -1,0 +1,79 @@
+body {
+  background: linear-gradient(135deg, #9fcce3, #beccee);
+  min-height: 100vh;
+  /* display: flex;
+  align-items: center;
+  justify-content: center; */
+}
+
+
+
+/* Common Bubble Look */
+.bubble-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(145deg, #f0f9ff, #cfe9ff);
+  border-radius: 50px;
+  padding: 15px 25px;
+  box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.15),
+              -4px -4px 8px rgba(255, 255, 255, 0.8);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.bubble-card:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 8px 8px 18px rgba(0, 0, 0, 0.2),
+              -4px -4px 10px rgba(255, 255, 255, 0.9);
+}
+
+/* Button inside bubble */
+.bubble-btn {
+  background: linear-gradient(145deg, #007bff, #3399ff);
+  color: white;
+  border-radius: 50%;
+  padding: 10px 14px;
+  border: none;
+  box-shadow: inset -3px -3px 6px rgba(255, 255, 255, 0.6),
+              inset 3px 3px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+.bubble-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.7);
+}
+
+/* Big Right Bubble */
+/* Big Right Bubble (Book Style) */
+.bubble-big {
+  background: linear-gradient(145deg, #007bff, #3399ff);
+  border-radius: 30px;
+  padding: 60px;
+  width: 100%;
+  height: 100%;
+  max-width: 400px;
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.25),
+              -6px -6px 12px rgba(255, 255, 255, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;   /* Needed for ::before */
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.bubble-big:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 12px 12px 25px rgba(0, 0, 0, 0.3),
+              -6px -6px 14px rgba(255, 255, 255, 0.6);
+}
+
+/* Book spine effect */
+.bubble-big::before {
+  content: "";
+  position: absolute;
+  left: 0;                  /* stick to left side */
+  top: 10%;
+  bottom: 10%;
+  width: 4px;               /* thickness of line */
+  background: white;        /* spine color */
+  border-radius: 2px;       /* rounded edges */
+  box-shadow: 1px 0 4px rgba(255, 255, 255, 0.6);
+}
