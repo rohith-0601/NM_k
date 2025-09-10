@@ -9,7 +9,7 @@ function Question6() {
   const [time, setTime] = useState(0);
   const [primesInput, setPrimesInput] = useState("2203,2281"); // default primes
 
-  // Timer for elapsed time
+  // Timer
   useEffect(() => {
     let timer;
     if (loading) {
@@ -19,7 +19,7 @@ function Question6() {
     return () => clearInterval(timer);
   }, [loading]);
 
-  // Handle Run Code button
+  // Handle Run Code
   const handleRunCode = () => {
     setLoading(true);
     setOutput([]);
@@ -64,9 +64,7 @@ Show the number of digits and the number itself.`;
       {/* Navbar */}
       <nav
         className="navbar navbar-expand-lg navbar-light shadow-sm"
-        style={{
-          background: "linear-gradient(90deg, #d9a066, #f2c97d)",
-        }}
+        style={{ background: "linear-gradient(90deg, #d9a066, #f2c97d)" }}
       >
         <div className="container-fluid">
           <a className="navbar-brand fw-bold text-dark" href="/">
@@ -109,19 +107,30 @@ Show the number of digits and the number itself.`;
         <p className="lead text-muted text-center mb-5">{questionText}</p>
 
         <div className="row g-4">
-          {/* Input Box */}
-          <div className="col-12 text-center">
-            <input
-              type="text"
-              className="form-control w-50 mx-auto"
-              value={primesInput}
-              onChange={(e) => setPrimesInput(e.target.value)}
-              placeholder="Enter primes, e.g. 2203,2281"
-            />
+          {/* Question Box (Left) */}
+          <div className="col-12 col-lg-6">
+            <div className="card shadow-lg border-0 h-100 rounded-4">
+              <div
+                className="card-header text-dark fw-bold"
+                style={{ backgroundColor: "#f2c97d" }}
+              >
+                Question
+              </div>
+              <div className="card-body">
+                <p>{questionText}</p>
+                <input
+                  type="text"
+                  className="form-control mt-3"
+                  value={primesInput}
+                  onChange={(e) => setPrimesInput(e.target.value)}
+                  placeholder="Enter primes, e.g. 2203,2281"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Code + Output */}
-          <div className="col-12 d-flex flex-column gap-4">
+          {/* Code + Output (Right) */}
+          <div className="col-12 col-lg-6 d-flex flex-column gap-4">
             {/* Code Box */}
             <div className="card shadow-lg border-0 rounded-4 flex-fill">
               <div
@@ -195,7 +204,9 @@ Show the number of digits and the number itself.`;
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted">Enter primes and click "Run Code".</p>
+                  <p className="text-muted">
+                    Enter primes and click "Run Code".
+                  </p>
                 )}
               </div>
             </div>
