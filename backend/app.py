@@ -34,11 +34,19 @@ def route_q4():
 
 @app.route("/q5")
 def route_q5():
-    return jsonify({"output": questions.q5()})
+    max_digits = int(request.args.get("max_digits", 50))
+    max_primes = int(request.args.get("max_primes", 5))
+    return jsonify({"output": questions.q5(max_digits, max_primes)})
 
 @app.route("/q6")
 def route_q6():
-    return jsonify({"output": questions.q6()})
+    primes_str = request.args.get("primes", "")  # e.g. "2203,2281"
+    try:
+        primes = [int(x.strip()) for x in primes_str.split(",") if x.strip()]
+    except ValueError:
+        return jsonify({"error": "Invalid primes input"}), 400
+
+    return jsonify({"output": q6(primes)})
 
 @app.route("/q7")
 def route_q7():

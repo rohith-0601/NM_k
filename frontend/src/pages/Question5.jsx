@@ -8,6 +8,10 @@ function Q5() {
   const [loading, setLoading] = useState(false);
   const [time, setTime] = useState(0);
 
+  // User inputs
+  const [maxDigits, setMaxDigits] = useState(50);
+  const [maxPrimes, setMaxPrimes] = useState(5);
+
   // Timer for elapsed time
   useEffect(() => {
     let timer;
@@ -24,7 +28,9 @@ function Q5() {
     setTime(0);
 
     axios
-      .get("http://127.0.0.1:8000/q5")
+      .get("http://127.0.0.1:8000/q5", {
+        params: { max_digits: maxDigits, max_primes: maxPrimes },
+      })
       .then((res) => {
         setOutput(res.data.output);
         setLoading(false);
@@ -134,6 +140,28 @@ def q5(max_digits=50, max_primes=5):
               <div className="card-body">
                 <h4 className="fw-bold text-dark mb-3">Question 5</h4>
                 <p className="lead text-muted">{questionText}</p>
+
+                {/* Input fields */}
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Minimum Digits</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={maxDigits}
+                    onChange={(e) => setMaxDigits(e.target.value)}
+                    min="10"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Number of Primes</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={maxPrimes}
+                    onChange={(e) => setMaxPrimes(e.target.value)}
+                    min="1"
+                  />
+                </div>
               </div>
             </div>
           </div>

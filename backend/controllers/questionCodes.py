@@ -137,14 +137,13 @@ def euclid_number(p):
     """Compute Euclid number for a prime p: 2^(p-1) * (2^p - 1)"""
     return (2**(p - 1)) * (2**p - 1)
 
-def q6():
+
+def q6(primes):
     """
-    Returns Euclid numbers for primes 2203 and 2281.
-    Only returns digits count and string representation for frontend.
+    Compute Euclid numbers for given primes.
+    Returns list of dicts with prime, digits count, and number.
     """
     result = []
-    primes = [2203, 2281]
-
     for p in primes:
         n = euclid_number(p)
         result.append({
@@ -152,8 +151,8 @@ def q6():
             "digits": len(str(n)),
             "euclid_number": str(n)
         })
-
     return result
+
 
 
 import sympy

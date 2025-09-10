@@ -7,6 +7,7 @@ function Question6() {
   const [output, setOutput] = useState([]);
   const [loading, setLoading] = useState(false);
   const [time, setTime] = useState(0);
+  const [primesInput, setPrimesInput] = useState("2203,2281"); // default primes
 
   // Timer for elapsed time
   useEffect(() => {
@@ -23,7 +24,9 @@ function Question6() {
     setLoading(true);
     setOutput([]);
     axios
-      .get("http://127.0.0.1:8000/q6")
+      .get("http://127.0.0.1:8000/q6", {
+        params: { primes: primesInput },
+      })
       .then((res) => {
         setOutput(res.data.output);
         setLoading(false);
@@ -38,19 +41,19 @@ function Question6() {
 def euclid_number(p):
     return (2**(p-1)) * (2**p - 1)
 
-primes = [2203, 2281]
-result = []
-
-for p in primes:
-    n = euclid_number(p)
-    result.append({
-        "p": p,
-        "digits": len(str(n)),
-        "euclid_number": str(n)
-    })
+def q6(primes):
+    result = []
+    for p in primes:
+        n = euclid_number(p)
+        result.append({
+            "p": p,
+            "digits": len(str(n)),
+            "euclid_number": str(n)
+        })
+    return result
 `;
 
-  const questionText = `Compute Euclid numbers for primes 2203 and 2281.
+  const questionText = `Compute Euclid numbers for the primes you enter.
 Show the number of digits and the number itself.`;
 
   return (
@@ -106,23 +109,19 @@ Show the number of digits and the number itself.`;
         <p className="lead text-muted text-center mb-5">{questionText}</p>
 
         <div className="row g-4">
-          {/* Question Box (Left) */}
-          <div className="col-12 col-lg-6">
-            <div className="card shadow-lg border-0 h-100 rounded-4">
-              <div
-                className="card-header text-dark fw-bold"
-                style={{ backgroundColor: "#f2c97d" }}
-              >
-                Question
-              </div>
-              <div className="card-body">
-                <p className="mb-0">{questionText}</p>
-              </div>
-            </div>
+          {/* Input Box */}
+          <div className="col-12 text-center">
+            <input
+              type="text"
+              className="form-control w-50 mx-auto"
+              value={primesInput}
+              onChange={(e) => setPrimesInput(e.target.value)}
+              placeholder="Enter primes, e.g. 2203,2281"
+            />
           </div>
 
-          {/* Code + Output (Right) */}
-          <div className="col-12 col-lg-6 d-flex flex-column gap-4">
+          {/* Code + Output */}
+          <div className="col-12 d-flex flex-column gap-4">
             {/* Code Box */}
             <div className="card shadow-lg border-0 rounded-4 flex-fill">
               <div
@@ -196,7 +195,7 @@ Show the number of digits and the number itself.`;
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted">Click "Run Code" to see output.</p>
+                  <p className="text-muted">Enter primes and click "Run Code".</p>
                 )}
               </div>
             </div>
