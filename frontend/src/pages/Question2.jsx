@@ -7,6 +7,7 @@ function Q2() {
   const [output, setOutput] = useState([]);
   const [loading, setLoading] = useState(false);
   const [time, setTime] = useState(0);
+  const [maxPrimes, setMaxPrimes] = useState(5); // user input
 
   // Timer for elapsed time
   useEffect(() => {
@@ -24,7 +25,7 @@ function Q2() {
     setTime(0);
 
     axios
-      .get("http://127.0.0.1:8000/q2")
+      .get(`http://127.0.0.1:8000/q2?max_primes=${maxPrimes}`)
       .then((res) => {
         setOutput(res.data.output);
         setLoading(false);
@@ -46,18 +47,18 @@ for i in range(2, 1041):
 `;
 
   const questionText = `11 is prime, 111 is not prime. We use the notation 1N for N ones. 
-If N is prime, 1N might be prime. Determine the 5 primes between N = 2 and N = 1040.`;
+If N is prime, 1N might be prime. Determine the primes between N = 2 and N = 1040.`;
 
   return (
     <div
       className="min-vh-100 d-flex flex-column"
-      style={{ background: "linear-gradient(135deg, #f8f1df, #f0e4c3)" }} // light parchment
+      style={{ background: "linear-gradient(135deg, #f8f1df, #f0e4c3)" }}
     >
       {/* Navbar */}
       <nav
         className="navbar navbar-expand-lg shadow-sm"
         style={{
-          background: "linear-gradient(90deg, #d9a066, #f2c97d)", // warm faded gold
+          background: "linear-gradient(90deg, #d9a066, #f2c97d)",
         }}
       >
         <div className="container-fluid">
@@ -95,7 +96,7 @@ If N is prime, 1N might be prime. Determine the 5 primes between N = 2 and N = 1
         </div>
       </nav>
 
-      {/* Main Storybook Container */}
+      {/* Main Container */}
       <div className="container-fluid flex-grow-1 my-4">
         <div className="row h-100">
           {/* Left: Question Box */}
@@ -110,6 +111,21 @@ If N is prime, 1N might be prime. Determine the 5 primes between N = 2 and N = 1
               <div className="card-body">
                 <h4 className="fw-bold text-dark mb-3">Question 2</h4>
                 <p className="lead text-muted">{questionText}</p>
+
+                {/* Input for Max Primes */}
+                <div className="mb-3">
+                  <label className="form-label fw-bold">
+                    Max Primes to Find
+                  </label>
+                  <input
+                    type="number"
+                    value={maxPrimes}
+                    onChange={(e) => setMaxPrimes(e.target.value)}
+                    className="form-control"
+                    min="1"
+                    max="20"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -131,7 +147,7 @@ If N is prime, 1N might be prime. Determine the 5 primes between N = 2 and N = 1
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
                     fontSize: "0.9rem",
-                    background: "#fffaf0", // pale parchment
+                    background: "#fffaf0",
                     padding: "1rem",
                     borderRadius: "8px",
                   }}
@@ -141,7 +157,7 @@ If N is prime, 1N might be prime. Determine the 5 primes between N = 2 and N = 1
                 <button
                   className="btn mt-3 align-self-end"
                   style={{
-                    background: "linear-gradient(145deg, #cb7d5f, #ae705a)", // softer antique red
+                    background: "linear-gradient(145deg, #cb7d5f, #ae705a)",
                     color: "#fffaf0",
                     border: "none",
                   }}
@@ -191,7 +207,7 @@ If N is prime, 1N might be prime. Determine the 5 primes between N = 2 and N = 1
                           fontFamily: "monospace",
                         }}
                       >
-                        <strong>N = {item.i}</strong>: {item.repunit}
+                        <strong>N = {item.N}</strong>: {item.repunit}
                       </div>
                     ))}
                   </div>

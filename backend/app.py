@@ -18,11 +18,15 @@ def route_q1():
 
 @app.route("/q2")
 def route_q2():
-    return jsonify({"output": questions.q2()})
+    max_primes = request.args.get("max_primes", default=5, type=int)
+    return jsonify({"output": questions.q2(max_primes)})
 
 @app.route("/q3")
 def route_q3():
-    return jsonify({"output": questions.q3()})
+    start = request.args.get("start", default=2201, type=int)
+    end = request.args.get("end", default=2298, type=int)
+    return jsonify({"output": questions.q3(start, end)})
+
 
 @app.route("/q4")
 def route_q4():

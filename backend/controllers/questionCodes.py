@@ -68,13 +68,14 @@ def q2(max_primes=5):
 
 
 # ================= Q3 =================
-def q3():
+def q3(start=2201, end=2298):
     result = []
-    for i in range(2201, 2299):
+    for i in range(start, end + 1):
         n = 2**i - 1
         if isprime(n):
             result.append({"i": i, "mersenne": str(n)})
     return result
+
 
 
 # ================= Q4 =================

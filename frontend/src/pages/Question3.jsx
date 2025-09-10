@@ -8,6 +8,10 @@ function Q3() {
   const [loading, setLoading] = useState(false);
   const [time, setTime] = useState(0);
 
+  // Inputs
+  const [start, setStart] = useState(2201);
+  const [end, setEnd] = useState(2298);
+
   // Timer for elapsed time
   useEffect(() => {
     let timer;
@@ -24,7 +28,7 @@ function Q3() {
     setTime(0);
 
     axios
-      .get("http://127.0.0.1:8000/q3")
+      .get(`http://127.0.0.1:8000/q3?start=${start}&end=${end}`)
       .then((res) => {
         setOutput(res.data.output);
         setLoading(false);
@@ -45,20 +49,19 @@ for i in range(2201, 2299):
         result.append({"i": i, "mersenne": str(n)})
 `;
 
-  const questionText = `Find all Mersenne primes between 2^2201 - 1 and 2^2298 - 1.`;
+  const questionText = `Find all Mersenne primes between 2^N - 1, 
+where N ranges from 2201 to 2298 (inclusive).`;
 
   return (
     <div
       className="min-vh-100 d-flex flex-column"
-      style={{
-        background: "linear-gradient(135deg, #f8f1df, #f0e4c3)", // parchment background
-      }}
+      style={{ background: "linear-gradient(135deg, #f8f1df, #f0e4c3)" }}
     >
       {/* Navbar */}
       <nav
         className="navbar navbar-expand-lg navbar-light shadow-sm"
         style={{
-          background: "linear-gradient(90deg, #d9a066, #f2c97d)", // warm faded gold
+          background: "linear-gradient(90deg, #d9a066, #f2c97d)",
         }}
       >
         <div className="container-fluid">
@@ -96,21 +99,38 @@ for i in range(2201, 2299):
         </div>
       </nav>
 
-      {/* Main LeetCode Style Container */}
+      {/* Main Container */}
       <div className="container-fluid flex-grow-1 my-4">
         <div className="row h-100">
           {/* Left: Question Box */}
           <div className="col-12 col-lg-6 mb-4 mb-lg-0">
             <div className="card shadow-lg border-0 h-100 rounded-4">
-              <div
-                className="card-header fw-bold"
-                style={{ backgroundColor: "#f2c97d" }} // Question header
-              >
+              <div className="card-header fw-bold" style={{ background: "#f2c97d" }}>
                 Question
               </div>
               <div className="card-body">
                 <h4 className="fw-bold text-dark mb-3">Question 3</h4>
                 <p className="lead text-muted">{questionText}</p>
+
+                {/* Inputs */}
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Start (N)</label>
+                  <input
+                    type="number"
+                    value={start}
+                    onChange={(e) => setStart(e.target.value)}
+                    className="form-control"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-bold">End (N)</label>
+                  <input
+                    type="number"
+                    value={end}
+                    onChange={(e) => setEnd(e.target.value)}
+                    className="form-control"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -119,10 +139,7 @@ for i in range(2201, 2299):
           <div className="col-12 col-lg-6 d-flex flex-column">
             {/* Code Box */}
             <div className="card shadow-lg border-0 flex-fill mb-3 rounded-4">
-              <div
-                className="card-header fw-bold"
-                style={{ backgroundColor: "#c9a563" }} // Code header
-              >
+              <div className="card-header fw-bold" style={{ background: "#c9a563" }}>
                 Code
               </div>
               <div className="card-body d-flex flex-column">
@@ -132,7 +149,7 @@ for i in range(2201, 2299):
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
                     fontSize: "0.9rem",
-                    background: "#fffaf0", // pale parchment
+                    background: "#fffaf0",
                     padding: "1rem",
                     borderRadius: "8px",
                   }}
@@ -155,19 +172,13 @@ for i in range(2201, 2299):
 
             {/* Output Box */}
             <div className="card shadow-lg border-0 flex-fill rounded-4">
-              <div
-                className="card-header fw-bold"
-                style={{ backgroundColor: "rgba(176, 137, 66, 1)" }} // Output header
-              >
+              <div className="card-header fw-bold" style={{ background: "rgba(176, 137, 66, 1)" }}>
                 Output
               </div>
               <div className="card-body">
                 {loading ? (
                   <div className="d-flex align-items-center">
-                    <div
-                      className="spinner-border text-danger me-3"
-                      role="status"
-                    ></div>
+                    <div className="spinner-border text-danger me-3" role="status"></div>
                     <span>Processing... ({time}s)</span>
                   </div>
                 ) : output.length > 0 ? (
@@ -178,7 +189,6 @@ for i in range(2201, 2299):
                       scrollbarWidth: "none",
                       msOverflowStyle: "none",
                     }}
-                    className="hide-scrollbar"
                   >
                     {output.map((item, index) => (
                       <div
@@ -186,12 +196,12 @@ for i in range(2201, 2299):
                         style={{
                           marginBottom: "0.5rem",
                           padding: "0.5rem",
-                          background: "#fffaf0", // output background
+                          background: "#fffaf0",
                           borderRadius: "6px",
                           fontFamily: "monospace",
                         }}
                       >
-                        <strong>i = {item.i}</strong>: {item.mersenne}
+                        <strong>N = {item.i}</strong>: {item.mersenne}
                       </div>
                     ))}
                   </div>
