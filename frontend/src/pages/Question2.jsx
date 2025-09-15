@@ -51,7 +51,7 @@ function Q2() {
       setOutputLines((prev) => [
         ...prev,
         ...outputArr.map((item, idx) => {
-          const nValue = item.i ?? idx + start;
+          const nValue = item.N ?? idx + start;
           const repunit = item.repunit ?? item;
           return `N = ${nValue}: ${repunit}`;
         }),

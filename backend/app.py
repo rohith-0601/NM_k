@@ -52,9 +52,8 @@ def route_q5():
 # ================= Q6 =================
 @app.route("/q6")
 def route_q6():
-    start = request.args.get("start", default=2, type=int)
-    end = request.args.get("end", default=100, type=int)
-    return jsonify({"output": questions.q6(start, end)})
+    p = request.args.get("p", default=2, type=int)
+    return jsonify(questions.euclid_euler_perfect(p))
 
 
 # ================= Q7 =================

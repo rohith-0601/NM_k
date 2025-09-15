@@ -74,9 +74,10 @@ def q3(start: int, end: int):
 
 
 # ================= Q4 =================
-def q4(start: int, end: int, count=4):
+def q4(start: int = 2203, end: int = 2281, count: int = 4):
     """
     Find 'count' primes greater than (2^start - 1)^2 until below (2^end - 1)^2.
+    Default: uses Q3 known exponents (2203, 2281).
     """
     num1 = (2**start - 1)**2
     num2 = (2**end - 1)**2
@@ -93,13 +94,14 @@ def q4(start: int, end: int, count=4):
     return result
 
 
+
 # ================= Q5 =================
 from gmpy2 import mpz, is_prime
 
 def generate_palindrome(min_digits, max_primes):
     result = []
     prime_count = 0
-    length = min_digits if min_digits % 2 == 1 else min_digits + 1
+    length = min_digits  # <-- start exactly from given min_digits
 
     while prime_count < max_primes:
         half_len = (length + 1) // 2
@@ -108,10 +110,11 @@ def generate_palindrome(min_digits, max_primes):
 
         for i in range(start, end):
             s = str(i)
-            # odd or even palindrome
             if length % 2 == 0:
+                # even-length palindrome
                 pal = s + s[::-1]
             else:
+                # odd-length palindrome
                 pal = s + s[-2::-1]
 
             if is_prime(mpz(pal)):
@@ -120,32 +123,28 @@ def generate_palindrome(min_digits, max_primes):
                 if prime_count >= max_primes:
                     break
 
-        length += 2  # move to next length (keep parity)
+        length += 1  # ✅ move to next length (increment by 1, not +2)
 
     return result
+
 
 
 
 
 # ================= Q6 =================
-def euclid_number(p):
-    return (2**(p - 1)) * (2**p - 1)  # this is generating perfect numbers, keep as per original formula
+def euclid_euler_perfect(p: int):
+    """Generate the perfect number for exponent p if 2^p - 1 is prime."""
+    mersenne = (1 << p) - 1  # 2^p - 1
+    if not isprime(mersenne):
+        return {"p": p, "is_mersenne_prime": False}
 
-def q6(start: int, end: int):
-    """
-    Compute Euclid numbers (perfect numbers) for primes in [start, end].
-    """
-    result = []
-    for p in range(start, end + 1):
-        if isprime(p):
-            n = euclid_number(p)
-            result.append({
-                "p": p,
-                "digits": len(str(n)),
-                "euclid_number": str(n)
-            })
-    return result
-
+    perfect = (1 << (p - 1)) * mersenne
+    return {
+        "p": p,
+        "is_mersenne_prime": True,
+        "digits": len(str(perfect)),
+        "perfect_number": str(perfect)  # ⚠️ huge string, careful
+    }
 
 # ================= Q7 =================
 def sum_of_two_primes(n):

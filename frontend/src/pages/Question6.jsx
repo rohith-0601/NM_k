@@ -4,11 +4,10 @@ import "./Q1.css"; // Import Q1 CSS
 function Q6() {
   const [outputLines, setOutputLines] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(0); // 0=ready, 1=ask start, 2=ask end, 3=running
-  const [startPrime, setStartPrime] = useState("");
-  const [endPrime, setEndPrime] = useState("");
+  const [number, setNumber] = useState("");
   const [elapsedTime, setElapsedTime] = useState(0);
 
+  // Timer for loading
   useEffect(() => {
     let timer;
     if (loading) {
@@ -17,84 +16,71 @@ function Q6() {
     return () => clearInterval(timer);
   }, [loading]);
 
+  // Run session
   const handleRunClick = () => {
-    setStep(1);
-    setOutputLines(["Welcome to Q6 interactive session. Enter inputs below."]);
+    setOutputLines(["Welcome to Q6 interactive session. Enter a number below."]);
+    setNumber("");
   };
 
-  const handleStartSubmit = () => {
-    if (!startPrime) return;
-    setOutputLines((prev) => [...prev, `Start Prime = ${startPrime}`]);
-    setStep(2);
-  };
+  const handleSubmit = () => {
+    if (!number) return;
 
-  const handleEndSubmit = () => {
-    if (!endPrime) return;
     setOutputLines((prev) => [
       ...prev,
-      `End Prime = ${endPrime}`,
+      `Checking number = ${number}`,
       "Running backend...",
     ]);
-    setStep(3);
+
     setLoading(true);
     setElapsedTime(0);
 
-    fetch(`http://127.0.0.1:8000/q6?start=${startPrime}&end=${endPrime}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.output && data.output.length > 0) {
-          data.output.forEach((item) => {
-            setOutputLines((prev) => [
-              ...prev,
-              `p = ${item.p} | Digits: ${item.digits}\n${item.euclid_number}`,
-            ]);
-          });
-        } else {
-          setOutputLines((prev) => [...prev, "No output found."]);
-        }
-        setLoading(false);
-        setStep(1); // allow rerun
-      })
-      .catch((err) => {
-        console.error(err);
-        setOutputLines((prev) => [...prev, "❌ Error fetching data"]);
-        setLoading(false);
-        setStep(1);
-      });
+    fetch(`http://127.0.0.1:8000/q6?p=${number}`)
+  .then((res) => res.json())
+  .then((data) => {
+    if (data && data.is_mersenne_prime) {
+      setOutputLines((prev) => [
+        ...prev,
+        `✅ Perfect number found for p=${data.p}`,
+        `Digits: ${data.digits}`,
+        `Perfect Number: ${data.perfect_number}`
+      ]);
+    } else {
+      setOutputLines((prev) => [
+        ...prev,
+        `❌ 2^${number} - 1 is not prime → no perfect number`
+      ]);
+    }
+    setLoading(false);
+  })
+  .catch((err) => {
+    console.error(err);
+    setOutputLines((prev) => [...prev, "❌ Error fetching data"]);
+    setLoading(false);
+  });
+
   };
 
   return (
     <div className="q1-container">
       <h2 className="q1-title">Question 6</h2>
       <p className="q1-text">
-        Compute Euclid numbers for primes in the given range. Show number of digits and the number itself.
+        Enter a number and check whether it is a Perfect Number.
       </p>
 
       <button className="run-btn" onClick={handleRunClick}>
         Run Code
       </button>
 
-      {/* Step-by-step inputs */}
-      {step === 1 && (
+      {/* Input for number */}
+      {outputLines.length > 0 && (
         <div className="terminal-input">
-          <span>Start Prime: </span>
+          <span>Number: </span>
           <input
             type="number"
-            value={startPrime}
-            onChange={(e) => setStartPrime(e.target.value)}
+            value={number}
+            onChange={(e) => setNumber(e.target.value)}
           />
-          <button onClick={handleStartSubmit}>Submit</button>
-        </div>
-      )}
-      {step === 2 && (
-        <div className="terminal-input">
-          <span>End Prime: </span>
-          <input
-            type="number"
-            value={endPrime}
-            onChange={(e) => setEndPrime(e.target.value)}
-          />
-          <button onClick={handleEndSubmit}>Submit</button>
+          <button onClick={handleSubmit}>Submit</button>
         </div>
       )}
 
