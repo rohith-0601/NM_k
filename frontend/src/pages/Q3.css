@@ -1,0 +1,39 @@
+.q3-container {
+  min-height: 100vh;
+  background: #f5f7fa; /* very light blue */
+  padding: 40px;
+  font-family: "Courier New", monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #333;
+}
+
+.q3-title { font-size: 2rem; font-weight: bold; margin-bottom: 15px; }
+.q3-text {
+  background: #ffffff; padding: 20px; border-radius: 12px; width: 100%;
+  max-width: 1000px; margin-bottom: 20px; box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  word-wrap: break-word;
+}
+.run-btn {
+  background: #e0e0e0; color: #333; border: none; padding: 10px 25px;
+  border-radius: 12px; font-weight: bold; cursor: pointer; margin-bottom: 20px;
+}
+.run-btn:hover { transform: scale(1.05); box-shadow: 1px 1px 5px rgba(0,0,0,0.2); }
+
+.terminal-input { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.terminal-input input {
+  padding: 5px 10px; border-radius: 8px; border: 1px solid #aaa; flex: 1 1 100px;
+}
+.terminal-input button {
+  background: #d3d3d3; color: #333; border: none; border-radius: 8px;
+  padding: 5px 15px; cursor: pointer;
+}
+.terminal-input button:hover { transform: scale(1.05); box-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
+
+.terminal-output {
+  width: 100%; max-width: 1000px; background: #f9f9f9; border-radius: 12px;
+  padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.05); min-height: 300px;
+  font-size: 0.9rem; white-space: pre-wrap; word-break: break-word;
+}
+.loading { margin-top: 10px; font-style: italic; }

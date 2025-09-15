@@ -1,213 +1,100 @@
-import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState, useEffect } from "react";
+import "./Q1.css"; // reuse Q1.css for terminal-like styling
 
-const Question7 = () => {
-  const [num, setNum] = useState(
-    "1000000000000000000000000000000000000000000000000000" // 52-digit number
-  );
-  const [output, setOutput] = useState(null);
+function Q7() {
+  const [outputLines, setOutputLines] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [time, setTime] = useState(0);
+  const [step, setStep] = useState(0); // 0=ready, 1=ask number, 2=running
+  const [num, setNum] = useState("");
+  const [elapsedTime, setElapsedTime] = useState(0);
 
+  // Timer for running state
   useEffect(() => {
     let timer;
     if (loading) {
-      setTime(0);
-      timer = setInterval(() => setTime((t) => t + 1), 1000);
+      setElapsedTime(0);
+      timer = setInterval(() => setElapsedTime((t) => t + 1), 1000);
     }
     return () => clearInterval(timer);
   }, [loading]);
 
-  const handleRunCode = async () => {
-    setLoading(true);
-    setOutput(null);
-    try {
-      const res = await axios.get(`http://127.0.0.1:8000/q7?num=${num}`);
-      setOutput(res.data.output);
-    } catch (err) {
-      setOutput({ error: "Error fetching output" });
-    } finally {
-      setLoading(false);
-    }
+  const handleRunClick = () => {
+    setStep(1);
+    setOutputLines([
+      "Welcome to Q7 interactive session. Enter a number below.",
+    ]);
   };
 
-  const pythonCode = `
-def is_sum_of_two_primes(n):
-    if n < 4:
-        return False, None
-    for i in range(2, n//2 + 1):
-        if is_prime(i) and is_prime(n - i):
-            return True, (i, n - i)
-    return False, None
+  const handleNumSubmit = () => {
+    if (!num) return;
+    setOutputLines((prev) => [...prev, `Number = ${num}`, "Running backend..."]);
+    setStep(2);
+    setLoading(true);
 
-number = int("1000000000000000000000000000000000000000000000000000")
-can_sum, pair = is_sum_of_two_primes(number)
-result = {
-    "number": number,
-    "is_sum_of_two_primes": can_sum,
-    "pair": pair
-}
-`;
-
-  const questionText =
-    "Determine if a number can be expressed as the sum of two prime numbers.";
+    fetch(`http://127.0.0.1:8000/q7?num=${num}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.output) {
+          const o = data.output;
+          setOutputLines((prev) => [
+            ...prev,
+            `Number: ${o.number}`,
+            `Can be expressed as sum of two primes? ${
+              o.is_sum_of_two_primes ? "Yes ✅" : "No ❌"
+            }`,
+            o.pair
+              ? `Pair: ${o.pair[0]} + ${o.pair[1]}`
+              : "No valid pair found.",
+          ]);
+        } else {
+          setOutputLines((prev) => [...prev, "No output found."]);
+        }
+        setLoading(false);
+        setStep(1); // allow rerun
+      })
+      .catch((err) => {
+        console.error(err);
+        setOutputLines((prev) => [...prev, "❌ Error fetching data"]);
+        setLoading(false);
+        setStep(1);
+      });
+  };
 
   return (
-    <div
-      className="min-vh-100 d-flex flex-column"
-      style={{ background: "linear-gradient(135deg, #f8f1df, #f0e4c3)" }}
-    >
-      {/* Navbar */}
-      <nav
-        className="navbar navbar-expand-lg shadow-sm"
-        style={{ background: "linear-gradient(90deg, #d9a066, #f2c97d)" }}
-      >
-        <div className="container-fluid">
-          <a className="navbar-brand fw-bold text-dark" href="/">
-            Prime Assignment
-          </a>
-          <button
-            className="navbar-toggler bg-light"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <div className="navbar-nav ms-auto">
-              {[1, 2, 3, 4, 5, 6, 7].map((q) => (
-                <NavLink
-                  key={q}
-                  to={`/q${q}`}
-                  className={({ isActive }) =>
-                    `nav-link ${isActive ? "fw-bold text-danger" : "text-dark"}`
-                  }
-                >
-                  Q{q}
-                </NavLink>
-              ))}
-            </div>
-          </div>
+    <div className="q1-container">
+      <h2 className="q1-title">Question 7</h2>
+      <p className="q1-text">
+        Determine if a number can be expressed as the sum of two prime numbers.
+      </p>
+
+      <button className="run-btn" onClick={handleRunClick}>
+        Run Code
+      </button>
+
+      {/* Step input */}
+      {step === 1 && (
+        <div className="terminal-input">
+          <span>Enter Number: </span>
+          <input
+            type="text"
+            value={num}
+            onChange={(e) => setNum(e.target.value.replace(/\D/g, ""))}
+          />
+          <button onClick={handleNumSubmit}>Submit</button>
         </div>
-      </nav>
+      )}
 
-      {/* Content */}
-      <div className="container my-5">
-        <h2 className="fw-bold text-center text-dark mb-4">Question 7</h2>
-        <p className="lead text-muted text-center mb-5">{questionText}</p>
-
-        <div className="row g-4">
-          {/* Question Box */}
-          <div className="col-12 col-lg-6">
-            <div className="card shadow-lg border-0 h-100 rounded-4">
-              <div
-                className="card-header fw-bold"
-                style={{ background: "#f2c97d", color: "#000" }}
-              >
-                Question
-              </div>
-              <div className="card-body">
-                <p>{questionText}</p>
-                <input
-                  type="text"
-                  value={num}
-                  onChange={(e) => setNum(e.target.value.replace(/\D/g, ""))}
-                  className="form-control mt-3"
-                  style={{ maxWidth: "400px" }}
-                  placeholder="Enter a number"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Code + Output */}
-          <div className="col-12 col-lg-6 d-flex flex-column gap-4">
-            {/* Code Box */}
-            <div className="card shadow-lg border-0 rounded-4">
-              <div
-                className="card-header fw-bold"
-                style={{ background: "#c9a563", color: "#fffaf0" }}
-              >
-                Code
-              </div>
-              <div className="card-body text-start" style={{ background: "#fffaf0" }}>
-                <pre
-                  style={{
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  {pythonCode}
-                </pre>
-                <button
-                  className="btn mt-3"
-                  style={{
-                    background: "linear-gradient(145deg, #cb7d5f, #ae705a)",
-                    color: "#fffaf0",
-                  }}
-                  onClick={handleRunCode}
-                  disabled={loading}
-                >
-                  {loading ? "Running..." : "Run Code"}
-                </button>
-              </div>
-            </div>
-
-            {/* Output Box */}
-            <div className="card shadow-lg border-0 rounded-4">
-              <div
-                className="card-header fw-bold"
-                style={{ background: "rgba(176, 137, 66, 1)", color: "#fffaf0" }}
-              >
-                Output
-              </div>
-              <div className="card-body" style={{ background: "#fffaf0" }}>
-                {loading ? (
-                  <div className="d-flex align-items-center">
-                    <div
-                      className="spinner-border text-danger me-3"
-                      role="status"
-                    ></div>
-                    <span>Processing... ({time}s)</span>
-                  </div>
-                ) : output ? (
-                  output.error ? (
-                    <p>{output.error}</p>
-                  ) : (
-                    <div style={{ fontFamily: "monospace" }}>
-                      <p>
-                        Number: <strong>{output.number}</strong>
-                      </p>
-                      <p>
-                        Can be expressed as sum of two primes?{" "}
-                        <strong>
-                          {output.is_sum_of_two_primes ? "Yes" : "No"}
-                        </strong>
-                      </p>
-                      {output.pair && (
-                        <p>
-                          Pair:{" "}
-                          <strong>
-                            {output.pair[0]} + {output.pair[1]}
-                          </strong>
-                        </p>
-                      )}
-                    </div>
-                  )
-                ) : (
-                  <p className="text-muted">Click "Run Code" to see output.</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Terminal-style output */}
+      <div className="terminal-output">
+        {outputLines.map((line, idx) => (
+          <div key={idx}>{line}</div>
+        ))}
+        {loading && (
+          <div className="loading">⏳ Running... ({elapsedTime}s)</div>
+        )}
       </div>
     </div>
   );
-};
+}
 
-export default Question7;
+export default Q7;

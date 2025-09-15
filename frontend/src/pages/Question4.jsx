@@ -1,233 +1,117 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
-import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
+import "./Q1.css"; // using Q1 CSS
 
 function Q4() {
-  const [output, setOutput] = useState([]);
+  const [outputLines, setOutputLines] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [time, setTime] = useState(0);
+  const [startInput, setStartInput] = useState("");
+  const [endInput, setEndInput] = useState("");
+  const [step, setStep] = useState(0); // 0 = show Run Code, 1 = ask start, 2 = ask end, 3 = running
+  const [elapsedTime, setElapsedTime] = useState(0);
 
-  // Timer for elapsed time
   useEffect(() => {
     let timer;
     if (loading) {
-      timer = setInterval(() => setTime((t) => t + 1), 1000);
+      timer = setInterval(() => setElapsedTime((t) => t + 1), 1000);
     }
     return () => clearInterval(timer);
   }, [loading]);
 
-  // Run Code handler
-  const runCode = () => {
-    setLoading(true);
-    setOutput([]);
-    setTime(0);
+  const handleRunClick = () => {
+    setStep(1);
+    setOutputLines([
+      "Welcome to Q4 interactive session. Enter inputs below as prompted.",
+    ]);
+  };
 
-    axios
-      .get("http://127.0.0.1:8000/q4")
-      .then((res) => {
-        setOutput(res.data.output);
+  const handleStartSubmit = () => {
+    if (!startInput) return;
+    setOutputLines((prev) => [...prev, `Start N = ${startInput}`]);
+    setStep(2);
+  };
+
+  const handleEndSubmit = () => {
+    if (!endInput) return;
+    setOutputLines((prev) => [
+      ...prev,
+      `End N = ${endInput}`,
+      "Running backend...",
+    ]);
+    setStep(3);
+    setLoading(true);
+    setElapsedTime(0);
+
+    const s = Number(startInput);
+    const e = Number(endInput);
+
+    fetch(`http://127.0.0.1:8000/q4?start=${s}&end=${e}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.output && data.output.length > 0) {
+          data.output.forEach((item) => {
+            if (item.prime) {
+              setOutputLines((prev) => [...prev, item.prime]);
+            } else if (item.message) {
+              setOutputLines((prev) => [...prev, item.message]);
+            }
+          });
+        } else {
+          setOutputLines((prev) => [...prev, "No output found."]);
+        }
         setLoading(false);
+        setStep(1); // allow rerun
       })
-      .catch(() => {
-        setOutput([]);
+      .catch((err) => {
+        console.error(err);
+        setOutputLines((prev) => [...prev, "❌ Error fetching data"]);
         setLoading(false);
+        setStep(1);
       });
   };
 
-  const pythonCode = `
-from sympy import isprime
-
-num1 = (2**2203 - 1)**2
-num2 = (2**2281 - 1)**2
-count = 0
-result = []
-
-for i in range(num1, num2):
-    if isprime(i):
-        result.append({"prime": str(i)})
-        count += 1
-    if count > 6:
-        break
-
-if count == 6:
-    result.append({
-        "message": "So, there exist at least 4 primes between the given 2 numbers"
-    })
-`;
-
-  const questionText = `Find at least 4 prime numbers between (2^2203 - 1)^2 and (2^2281 - 1)^2.`;
-
   return (
-    <div
-      className="min-vh-100 d-flex flex-column"
-      style={{
-        background: "linear-gradient(135deg, #f8f1df, #f0e4c3)", // parchment bg
-      }}
-    >
-      {/* Navbar */}
-      <nav
-        className="navbar navbar-expand-lg navbar-light shadow-sm"
-        style={{
-          background: "linear-gradient(90deg, #d9a066, #f2c97d)", // warm faded gold
-        }}
-      >
-        <div className="container-fluid">
-          <a className="navbar-brand fw-bold text-dark" href="/">
-            Prime Assignment
-          </a>
-          <button
-            className="navbar-toggler bg-light"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <div className="navbar-nav ms-auto">
-              <NavLink to="/" className="nav-link text-dark">
-                Home
-              </NavLink>
-              {[1, 2, 3, 4, 5, 6, 7].map((q) => (
-                <NavLink
-                  key={q}
-                  to={`/q${q}`}
-                  className={({ isActive }) =>
-                    `nav-link ${
-                      isActive ? "fw-bold text-danger" : "text-dark"
-                    }`
-                  }
-                >
-                  Q{q}
-                </NavLink>
-              ))}
-            </div>
-          </div>
+    <div className="q1-container">
+      <h2 className="q1-title">Question 4</h2>
+      <p className="q1-text">
+        Find at least 4 prime numbers between (2^N1 - 1)^2 and (2^N2 - 1)^2.
+      </p>
+
+      {/* Run Code Button */}
+      <button className="run-btn" onClick={handleRunClick}>
+        Run Code
+      </button>
+
+      {/* Terminal-like input */}
+      {step === 1 && (
+        <div className="terminal-input">
+          <span>Start N: </span>
+          <input
+            type="number"
+            value={startInput}
+            onChange={(e) => setStartInput(e.target.value)}
+          />
+          <button onClick={handleStartSubmit}>Submit</button>
         </div>
-      </nav>
+      )}
 
-      {/* Main Container */}
-      <div className="container-fluid flex-grow-1 my-4">
-        <div className="row h-100">
-          {/* Question Box */}
-          <div className="col-12 col-lg-6 mb-4 mb-lg-0">
-            <div className="card shadow-lg border-0 h-100 rounded-4">
-              <div
-                className="card-header fw-bold"
-                style={{ backgroundColor: "#f2c97d" }} // Question header
-              >
-                Question
-              </div>
-              <div className="card-body">
-                <h4 className="fw-bold text-dark mb-3">Question 4</h4>
-                <p className="lead text-muted">{questionText}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Code + Output */}
-          <div className="col-12 col-lg-6 d-flex flex-column">
-            {/* Code */}
-            <div className="card shadow-lg border-0 flex-fill mb-3 rounded-4">
-              <div
-                className="card-header fw-bold"
-                style={{ backgroundColor: "#c9a563" }} // Code header
-              >
-                Code
-              </div>
-              <div className="card-body d-flex flex-column">
-                <pre
-                  style={{
-                    flexGrow: 1,
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    fontSize: "0.9rem",
-                    background: "#fffaf0", // pale parchment
-                    padding: "1rem",
-                    borderRadius: "8px",
-                  }}
-                >
-                  {pythonCode}
-                </pre>
-                <button
-                  className="btn mt-3 align-self-end"
-                  onClick={runCode}
-                  disabled={loading}
-                  style={{
-                    background: "linear-gradient(145deg, #cb7d5f, #ae705a)",
-                    color: "#fffaf0",
-                  }}
-                >
-                  {loading ? "Running..." : "Run Code"}
-                </button>
-              </div>
-            </div>
-
-            {/* Output */}
-            <div className="card shadow-lg border-0 flex-fill rounded-4">
-              <div
-                className="card-header fw-bold"
-                style={{ backgroundColor: "rgba(176, 137, 66, 1)" }} // Output header
-              >
-                Output
-              </div>
-              <div className="card-body">
-                {loading ? (
-                  <div className="d-flex align-items-center">
-                    <div
-                      className="spinner-border text-danger me-3"
-                      role="status"
-                    ></div>
-                    <span>Processing... ({time}s)</span>
-                  </div>
-                ) : output.length > 0 ? (
-                  <div
-                    style={{
-                      maxHeight: "500px",
-                      overflowY: "auto",
-                      scrollbarWidth: "none",
-                      msOverflowStyle: "none",
-                    }}
-                    className="hide-scrollbar"
-                  >
-                    {output.map((item, index) =>
-                      item.prime ? (
-                        <div
-                          key={index}
-                          style={{
-                            marginBottom: "0.5rem",
-                            padding: "0.5rem",
-                            background: "#fffaf0", // output bg
-                            borderRadius: "6px",
-                            fontFamily: "monospace",
-                          }}
-                        >
-                          {item.prime}
-                        </div>
-                      ) : item.message ? (
-                        <div
-                          key={index}
-                          style={{
-                            marginBottom: "0.5rem",
-                            padding: "0.5rem",
-                            background: "#fffaf0", // message bg also parchment
-                            borderRadius: "6px",
-                            fontFamily: "monospace",
-                          }}
-                        >
-                          {item.message}
-                        </div>
-                      ) : null
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-muted">Click "Run Code" to see output.</p>
-                )}
-              </div>
-            </div>
-          </div>
+      {step === 2 && (
+        <div className="terminal-input">
+          <span>End N: </span>
+          <input
+            type="number"
+            value={endInput}
+            onChange={(e) => setEndInput(e.target.value)}
+          />
+          <button onClick={handleEndSubmit}>Submit</button>
         </div>
+      )}
+
+      {/* Terminal Output */}
+      <div className="terminal-output">
+        {outputLines.map((line, idx) => (
+          <div key={idx}>{line}</div>
+        ))}
+        {loading && <div className="loading">⏳ Running... ({elapsedTime}s)</div>}
       </div>
     </div>
   );

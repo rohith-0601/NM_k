@@ -1,0 +1,96 @@
+.q1-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fdfdfd, #f0f4f8); /* very light blue & white */
+  padding: 40px;
+  color: #333333;
+  font-family: "Courier New", monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.q1-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #1f2937; /* dark gray for contrast */
+}
+
+.q1-text {
+  background: #fffdf7; /* soft cream */
+  padding: 20px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1000px;
+  box-shadow: 2px 2px 12px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+  word-wrap: break-word;
+}
+
+.run-btn {
+  background: linear-gradient(145deg, #f0f4f8, #e8edf3); /* soft whites & very light blue */
+  color: #1f2937;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.run-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+}
+
+.terminal-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.terminal-input input {
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1; /* soft gray-blue border */
+  flex: 1 1 100px;
+  background: #f8fafc; /* light blue-white */
+  color: #1f2937;
+}
+
+.terminal-input button {
+  background: linear-gradient(145deg, #fdfdfd, #f0f4f8);
+  color: #1f2937;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 15px;
+  cursor: pointer;
+}
+
+.terminal-input button:hover {
+  transform: scale(1.05);
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+}
+
+.terminal-output {
+  width: 100%;
+  max-width: 1000px;
+  background: #f7f9fc; /* soft light blue */
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #d1d9e6; /* subtle border to separate from page */
+  box-shadow: 2px 2px 15px rgba(0,0,0,0.08); /* slightly stronger shadow */
+  min-height: 300px;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #1f2937;
+}
+
+
+.loading {
+  margin-top: 10px;
+  font-style: italic;
+  color: #4b5563; /* soft gray */
+}

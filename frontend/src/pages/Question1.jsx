@@ -1,243 +1,137 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import "./Q1.css";
 
 function Q1() {
-  const [output, setOutput] = useState(null);
+  const [outputLines, setOutputLines] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [currentCheck, setCurrentCheck] = useState(null);
-  const [start, setStart] = useState(1000);
-  const [end, setEnd] = useState(3000);
+  const [startInput, setStartInput] = useState("");
+  const [endInput, setEndInput] = useState("");
+  const [step, setStep] = useState(0); // 0 = show Run Code, 1 = ask start, 2 = ask end, 3 = running
 
-  const runCode = () => {
+  const handleRunCodeClick = () => {
+    setStep(1);
+    setOutputLines([
+      "Welcome to Q1 interactive session. Enter inputs below as prompted."
+    ]);
+    setStartInput("");
+    setEndInput("");
+  };
+
+  const handleStartSubmit = () => {
+    if (!startInput) return;
+    setOutputLines((prev) => [...prev, `Start = ${startInput}`]);
+    setStep(2);
+  };
+
+  const handleEndSubmit = () => {
+    if (!endInput) return;
+    setOutputLines((prev) => [...prev, `End = ${endInput}`, "Running backend..."]);
+    setStep(3);
     setLoading(true);
-    setOutput(null);
-    setElapsedTime(0);
-    setCurrentCheck(null);
 
-    // Start frontend timer
-    let timerId = setInterval(() => {
-      setElapsedTime((prev) => prev + 1);
-    }, 1000);
+    const start = parseInt(startInput);
+    const end = parseInt(endInput);
 
-    // Pass start and end as query params
     const eventSource = new EventSource(
       `http://127.0.0.1:8000/q1/stream?start=${start}&end=${end}`
     );
 
     eventSource.onmessage = (e) => {
-      const data = JSON.parse(e.data);
+      try {
+        const data = JSON.parse(e.data.replace(/'/g, '"'));
 
-      if (data.found) {
-        setOutput(data);
+        if (data.found) {
+          setOutputLines((prev) => [
+            ...prev,
+            `%c✅ Found Kaprekar Prime n=${data.n}, number=${data.kaprekar_number}`,
+          ]);
+          setLoading(false);
+          setStep(0); // allow rerun
+          eventSource.close();
+        } else if (data.not_found) {
+          setOutputLines((prev) => [
+            ...prev,
+            `❌ No Kaprekar prime found. Last checked=${data.last_checked}`,
+          ]);
+          setLoading(false);
+          setStep(0); // allow rerun
+          eventSource.close();
+        } else if (data.current_check && data.kaprekar_number) {
+          setOutputLines((prev) => [
+            ...prev,
+            `Checking n=${data.current_check}: ${data.kaprekar_number} -> Not prime`,
+          ]);
+        }
+      } catch (err) {
+        setOutputLines((prev) => [...prev, "⚠️ JSON parse error"]);
+        console.error(err);
         setLoading(false);
-        clearInterval(timerId);
-        eventSource.close();
-      } else if (data.not_found) {
-        setOutput({ message: "No prime found in given range" });
-        setLoading(false);
-        clearInterval(timerId);
-        eventSource.close();
-      } else {
-        setCurrentCheck(data.current_check);
+        setStep(0); // allow rerun
       }
     };
 
     eventSource.onerror = (err) => {
-      console.error("EventSource failed:", err);
-      setOutput({ error: "Error streaming output" });
+      setOutputLines((prev) => [...prev, "❌ Streaming error"]);
       setLoading(false);
-      clearInterval(timerId);
+      setStep(0); // allow rerun
       eventSource.close();
     };
   };
 
   return (
-    <div
-      className="min-vh-100 d-flex flex-column"
-      style={{ background: "linear-gradient(135deg, #f8f1df, #f0e4c3)" }} // light parchment
-    >
-      {/* Navbar */}
-      <nav
-        className="navbar navbar-expand-lg shadow-sm"
-        style={{
-          background: "linear-gradient(90deg, #d9a066, #f2c97d)", // warm faded gold
-        }}
-      >
-        <div className="container-fluid">
-          <a className="navbar-brand fw-bold text-dark" href="/">
-            Prime Assignment
-          </a>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <div className="navbar-nav ms-auto">
-              <NavLink to="/" className="nav-link text-dark">
-                Home
-              </NavLink>
-              {[1, 2, 3, 4, 5, 6, 7].map((q) => (
-                <NavLink
-                  key={q}
-                  to={`/q${q}`}
-                  className={({ isActive }) =>
-                    `nav-link ${isActive ? "fw-bold text-danger" : "text-dark"}`
-                  }
-                >
-                  Q{q}
-                </NavLink>
-              ))}
-            </div>
-          </div>
+    <div className="q1-container">
+      <h2 className="q1-title">Question 1</h2>
+      <p className="q1-text">
+        A prime number is 12345678910987654321. Here n is 10. Find the next number that follows this pattern. That number n lies between 1000 and 3000.
+      </p>
+
+      {/* Run Code Button */}
+      {step === 0 && (
+        <button className="run-btn" onClick={handleRunCodeClick}>
+          Run Code
+        </button>
+      )}
+
+      {/* Terminal-like input */}
+      {step === 1 && (
+        <div className="terminal-input">
+          <span>Start: </span>
+          <input
+            type="number"
+            value={startInput}
+            onChange={(e) => setStartInput(e.target.value)}
+          />
+          <button onClick={handleStartSubmit}>Submit</button>
         </div>
-      </nav>
+      )}
 
-      {/* Main Storybook Container */}
-      <div className="container-fluid flex-grow-1 my-4">
-        <div className="row h-100">
-          {/* Left: Question Box */}
-          <div className="col-12 col-lg-6 mb-4 mb-lg-0">
-            <div className="card shadow-lg border-0 h-100 rounded-4">
-              <div
-                className="card-header fw-bold text-dark"
-                style={{ background: "#f2c97d" }}
-              >
-                Question
-              </div>
-              <div className="card-body">
-                <h4 className="fw-bold text-dark mb-3">Question 1</h4>
-                <p className="lead text-muted">
-                  A prime number is 12345678910987654321. Here n is 10. Find the
-                  next number that follows this pattern. That number n lies
-                  between 1000 and 3000.
-                </p>
-
-                {/* Inputs for range */}
-                <div className="mb-3">
-                  <label className="form-label fw-bold">Start</label>
-                  <input
-                    type="number"
-                    value={start}
-                    onChange={(e) => setStart(e.target.value)}
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label fw-bold">End</label>
-                  <input
-                    type="number"
-                    value={end}
-                    onChange={(e) => setEnd(e.target.value)}
-                    className="form-control"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Code + Output */}
-          <div className="col-12 col-lg-6 d-flex flex-column">
-            {/* Code Box */}
-            <div className="card shadow-lg border-0 flex-fill mb-3 rounded-4">
-              <div
-                className="card-header fw-bold text-dark"
-                style={{ background: "#c9a563ff" }}
-              >
-                Code
-              </div>
-              <div className="card-body d-flex flex-column">
-                <pre
-                  style={{
-                    flexGrow: 1,
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    fontSize: "0.9rem",
-                    background: "#fffaf0", // pale parchment
-                    padding: "1rem",
-                    borderRadius: "8px",
-                  }}
-                >
-                  {`def build_kaprekar(num_limit: int) -> int:
-    num = 0
-    for i in range(1, num_limit + 1):
-        num = num * (10 ** len(str(i))) + i
-    for i in range(num_limit - 1, 0, -1):
-        num = num * (10 ** len(str(i))) + i
-    return num
-
-def stream_q1(start, end):
-    start_time = time.time()
-    for num_limit in range(start, end + 1):
-        kap_number = build_kaprekar(num_limit)
-        elapsed_time = round(time.time() - start_time, 2)
-        yield f"data: {{'current_check': {num_limit}, 'elapsed_time': {elapsed_time}}}\\n\\n"
-        if gmpy2.is_prime(kap_number):
-            yield f"data: {{'found': true, 'n': {num_limit}, 'kaprekar_number': '{kap_number}', 'elapsed_time': {elapsed_time}}}\\n\\n"
-            break`}
-                </pre>
-                <button
-                  className="btn mt-3 align-self-end"
-                  style={{
-                    background: "linear-gradient(145deg, #cb7d5fff, #ae705aff)", // softer antique red
-                    color: "#fffaf0",
-                    border: "none",
-                  }}
-                  onClick={runCode}
-                  disabled={loading}
-                >
-                  {loading ? "Running..." : "Run Code"}
-                </button>
-              </div>
-            </div>
-
-            {/* Output Box */}
-            <div className="card shadow-lg border-0 flex-fill rounded-4">
-              <div
-                className="card-header fw-bold text-dark"
-                style={{ background: "rgba(176, 137, 66, 1)" }}
-              >
-                Output
-              </div>
-              <div className="card-body">
-                {loading ? (
-                  <div className="d-flex flex-column">
-                    <div className="d-flex align-items-center mb-2">
-                      <div
-                        className="spinner-border text-danger me-3"
-                        role="status"
-                      ></div>
-                      <span>Processing... ({elapsedTime}s)</span>
-                    </div>
-                    {currentCheck && (
-                      <p className="text-muted">
-                        Currently checking n = {currentCheck}
-                      </p>
-                    )}
-                  </div>
-                ) : output ? (
-                  output.error ? (
-                    <p className="text-danger">{output.error}</p>
-                  ) : (
-                    <pre
-                      style={{
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-word",
-                        fontSize: "0.95rem",
-                        background: "#fffaf0", // pale parchment
-                        padding: "1rem",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      {JSON.stringify(output.message, null, 2)}
-                    </pre>
-                  )
-                ) : (
-                  <p className="text-muted">
-                    Click "Run Code" to start streaming.
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+      {step === 2 && (
+        <div className="terminal-input">
+          <span>End: </span>
+          <input
+            type="number"
+            value={endInput}
+            onChange={(e) => setEndInput(e.target.value)}
+          />
+          <button onClick={handleEndSubmit}>Submit</button>
         </div>
+      )}
+
+      {/* Terminal output */}
+      <div className="terminal-output">
+        {outputLines.map((line, idx) => {
+          const isNotPrime = line.includes("-> Not prime");
+          const isFound = line.includes("✅");
+          return (
+            <div
+              key={idx}
+              className={isNotPrime ? "not-prime" : isFound ? "found-prime" : ""}
+            >
+              {line}
+            </div>
+          );
+        })}
+        {loading && <div className="loading">⏳ Running...</div>}
       </div>
     </div>
   );

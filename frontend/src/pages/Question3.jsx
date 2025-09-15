@@ -1,217 +1,94 @@
-import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState } from "react";
+import "./Q3.css"; // Create CSS similar to Q1 for styling
 import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 function Q3() {
-  const [output, setOutput] = useState([]);
+  const [outputLines, setOutputLines] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [time, setTime] = useState(0);
+  const [startInput, setStartInput] = useState("");
+  const [endInput, setEndInput] = useState("");
+  const [step, setStep] = useState(0); // 0=show Run,1=start input,2=end input,3=running
 
-  // Inputs
-  const [start, setStart] = useState(2201);
-  const [end, setEnd] = useState(2298);
+  const handleRunCodeClick = () => {
+    setStep(1);
+    setOutputLines(["Welcome to Q3 interactive session. Enter inputs as prompted."]);
+  };
 
-  // Timer for elapsed time
-  useEffect(() => {
-    let timer;
-    if (loading) {
-      timer = setInterval(() => setTime((t) => t + 1), 1000);
-    }
-    return () => clearInterval(timer);
-  }, [loading]);
+  const handleStartSubmit = () => {
+    if (!startInput) return;
+    setOutputLines((prev) => [...prev, `Start N = ${startInput}`]);
+    setStep(2);
+  };
 
-  // Run Code button handler
-  const runCode = () => {
+  const handleEndSubmit = () => {
+    if (!endInput) return;
+    setOutputLines((prev) => [...prev, `End N = ${endInput}`, "Running backend..."]);
+    setStep(3);
     setLoading(true);
-    setOutput([]);
-    setTime(0);
+
+    const start = parseInt(startInput);
+    const end = parseInt(endInput);
 
     axios
       .get(`http://127.0.0.1:8000/q3?start=${start}&end=${end}`)
       .then((res) => {
-        setOutput(res.data.output);
+        const outputArr = res.data.output || [];
+        outputArr.forEach((item, idx) => {
+          const nValue = item.i ?? idx + start;
+          const mersenne = item.mersenne ?? item;
+          setOutputLines((prev) => [
+            ...prev,
+            `N = ${nValue}: ${mersenne}`
+          ]);
+        });
         setLoading(false);
       })
       .catch(() => {
-        setOutput([]);
+        setOutputLines((prev) => [...prev, "❌ Error fetching output"]);
         setLoading(false);
       });
   };
 
-  const pythonCode = `
-from sympy import isprime
-
-result = []
-for i in range(2201, 2299):
-    n = 2**i - 1
-    if isprime(n):
-        result.append({"i": i, "mersenne": str(n)})
-`;
-
-  const questionText = `Find all Mersenne primes between 2^N - 1, 
-where N ranges from 2201 to 2298 (inclusive).`;
-
   return (
-    <div
-      className="min-vh-100 d-flex flex-column"
-      style={{ background: "linear-gradient(135deg, #f8f1df, #f0e4c3)" }}
-    >
-      {/* Navbar */}
-      <nav
-        className="navbar navbar-expand-lg navbar-light shadow-sm"
-        style={{
-          background: "linear-gradient(90deg, #d9a066, #f2c97d)",
-        }}
-      >
-        <div className="container-fluid">
-          <a className="navbar-brand fw-bold text-dark" href="/">
-            Prime Assignment
-          </a>
-          <button
-            className="navbar-toggler bg-light"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <div className="navbar-nav ms-auto">
-              <NavLink to="/" className="nav-link text-dark">
-                Home
-              </NavLink>
-              {[1, 2, 3, 4, 5, 6, 7].map((q) => (
-                <NavLink
-                  key={q}
-                  to={`/q${q}`}
-                  className={({ isActive }) =>
-                    `nav-link ${
-                      isActive ? "fw-bold text-danger" : "text-dark"
-                    }`
-                  }
-                >
-                  Q{q}
-                </NavLink>
-              ))}
-            </div>
-          </div>
+    <div className="q3-container">
+      <h2 className="q3-title">Question 3</h2>
+      <p className="q3-text">
+        Find all Mersenne primes between 2^N - 1, where N ranges from 2201 to 2298 (inclusive).
+      </p>
+
+      <button className="run-btn" onClick={handleRunCodeClick}>
+        Run Code
+      </button>
+
+      {step === 1 && (
+        <div className="terminal-input">
+          <span>Start N: </span>
+          <input
+            type="number"
+            value={startInput}
+            onChange={(e) => setStartInput(e.target.value)}
+          />
+          <button onClick={handleStartSubmit}>Submit</button>
         </div>
-      </nav>
+      )}
 
-      {/* Main Container */}
-      <div className="container-fluid flex-grow-1 my-4">
-        <div className="row h-100">
-          {/* Left: Question Box */}
-          <div className="col-12 col-lg-6 mb-4 mb-lg-0">
-            <div className="card shadow-lg border-0 h-100 rounded-4">
-              <div className="card-header fw-bold" style={{ background: "#f2c97d" }}>
-                Question
-              </div>
-              <div className="card-body">
-                <h4 className="fw-bold text-dark mb-3">Question 3</h4>
-                <p className="lead text-muted">{questionText}</p>
-
-                {/* Inputs */}
-                <div className="mb-3">
-                  <label className="form-label fw-bold">Start (N)</label>
-                  <input
-                    type="number"
-                    value={start}
-                    onChange={(e) => setStart(e.target.value)}
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label fw-bold">End (N)</label>
-                  <input
-                    type="number"
-                    value={end}
-                    onChange={(e) => setEnd(e.target.value)}
-                    className="form-control"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Code + Output */}
-          <div className="col-12 col-lg-6 d-flex flex-column">
-            {/* Code Box */}
-            <div className="card shadow-lg border-0 flex-fill mb-3 rounded-4">
-              <div className="card-header fw-bold" style={{ background: "#c9a563" }}>
-                Code
-              </div>
-              <div className="card-body d-flex flex-column">
-                <pre
-                  style={{
-                    flexGrow: 1,
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    fontSize: "0.9rem",
-                    background: "#fffaf0",
-                    padding: "1rem",
-                    borderRadius: "8px",
-                  }}
-                >
-                  {pythonCode}
-                </pre>
-                <button
-                  className="btn mt-3 align-self-end"
-                  onClick={runCode}
-                  disabled={loading}
-                  style={{
-                    background: "linear-gradient(145deg, #cb7d5f, #ae705a)",
-                    color: "#fffaf0",
-                  }}
-                >
-                  {loading ? "Running..." : "Run Code"}
-                </button>
-              </div>
-            </div>
-
-            {/* Output Box */}
-            <div className="card shadow-lg border-0 flex-fill rounded-4">
-              <div className="card-header fw-bold" style={{ background: "rgba(176, 137, 66, 1)" }}>
-                Output
-              </div>
-              <div className="card-body">
-                {loading ? (
-                  <div className="d-flex align-items-center">
-                    <div className="spinner-border text-danger me-3" role="status"></div>
-                    <span>Processing... ({time}s)</span>
-                  </div>
-                ) : output.length > 0 ? (
-                  <div
-                    style={{
-                      maxHeight: "500px",
-                      overflowY: "auto",
-                      scrollbarWidth: "none",
-                      msOverflowStyle: "none",
-                    }}
-                  >
-                    {output.map((item, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          marginBottom: "0.5rem",
-                          padding: "0.5rem",
-                          background: "#fffaf0",
-                          borderRadius: "6px",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        <strong>N = {item.i}</strong>: {item.mersenne}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted">Click "Run Code" to see output.</p>
-                )}
-              </div>
-            </div>
-          </div>
+      {step === 2 && (
+        <div className="terminal-input">
+          <span>End N: </span>
+          <input
+            type="number"
+            value={endInput}
+            onChange={(e) => setEndInput(e.target.value)}
+          />
+          <button onClick={handleEndSubmit}>Submit</button>
         </div>
+      )}
+
+      <div className="terminal-output">
+        {outputLines.map((line, idx) => (
+          <div key={idx}>{line}</div>
+        ))}
+        {loading && <div className="loading">⏳ Running...</div>}
       </div>
     </div>
   );

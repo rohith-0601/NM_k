@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
+import "./Q1.css"; // reuse Q1 terminal-style CSS
 
 function Q2() {
-  const [output, setOutput] = useState([]);
+  const [outputLines, setOutputLines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [time, setTime] = useState(0);
-  const [maxPrimes, setMaxPrimes] = useState(5); // user input
 
-  // Timer for elapsed time
+  const [startInput, setStartInput] = useState("");
+  const [endInput, setEndInput] = useState("");
+  const [step, setStep] = useState(0); // 0 = show Run Code, 1 = ask start, 2 = ask end, 3 = running
+  const [outputData, setOutputData] = useState([]); // store axios output
+
   useEffect(() => {
     let timer;
     if (loading) {
@@ -18,206 +21,94 @@ function Q2() {
     return () => clearInterval(timer);
   }, [loading]);
 
-  // Run Code button handler
-  const runCode = () => {
-    setLoading(true);
-    setOutput([]);
+  const handleRunCodeClick = () => {
+    setStep(1);
+    setOutputLines(["Welcome to Q2 interactive session. Enter inputs below as prompted."]);
+    setOutputData([]);
     setTime(0);
-
-    axios
-      .get(`http://127.0.0.1:8000/q2?max_primes=${maxPrimes}`)
-      .then((res) => {
-        setOutput(res.data.output);
-        setLoading(false);
-      })
-      .catch(() => {
-        setOutput([]);
-        setLoading(false);
-      });
   };
 
-  const pythonCode = `
-from sympy import isprime
+  const handleStartSubmit = () => {
+    if (!startInput) return;
+    setOutputLines((prev) => [...prev, `Start N = ${startInput}`]);
+    setStep(2);
+  };
 
-result = []
-for i in range(2, 1041):
-    n = (10**i - 1) // 9  # 1N (repunit)
-    if isprime(i) and isprime(n):
-        result.append({"i": i, "repunit": str(n)})
-`;
+  const handleEndSubmit = () => {
+  if (!endInput) return;
+  setOutputLines((prev) => [...prev, `End N = ${endInput}`, "Running backend..."]);
+  setStep(3);
+  setLoading(true);
+
+  const start = parseInt(startInput);
+  const end = parseInt(endInput);
+
+  axios
+    .get(`http://127.0.0.1:8000/q2?start=${start}&end=${end}`)
+    .then((res) => {
+      const outputArr = res.data.output || [];
+      setOutputData(outputArr);
+      setOutputLines((prev) => [
+        ...prev,
+        ...outputArr.map((item, idx) => {
+          const nValue = item.i ?? idx + start;
+          const repunit = item.repunit ?? item;
+          return `N = ${nValue}: ${repunit}`;
+        }),
+      ]);
+      setLoading(false);
+    })
+    .catch(() => {
+      setOutputLines((prev) => [...prev, "❌ Error fetching output"]);
+      setLoading(false);
+    });
+};
+
 
   const questionText = `11 is prime, 111 is not prime. We use the notation 1N for N ones. 
 If N is prime, 1N might be prime. Determine the primes between N = 2 and N = 1040.`;
 
   return (
-    <div
-      className="min-vh-100 d-flex flex-column"
-      style={{ background: "linear-gradient(135deg, #f8f1df, #f0e4c3)" }}
-    >
-      {/* Navbar */}
-      <nav
-        className="navbar navbar-expand-lg shadow-sm"
-        style={{
-          background: "linear-gradient(90deg, #d9a066, #f2c97d)",
-        }}
-      >
-        <div className="container-fluid">
-          <a className="navbar-brand fw-bold text-dark" href="/">
-            Prime Assignment
-          </a>
-          <button
-            className="navbar-toggler bg-light"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <div className="navbar-nav ms-auto">
-              <NavLink to="/" className="nav-link text-dark">
-                Home
-              </NavLink>
-              {[1, 2, 3, 4, 5, 6, 7].map((q) => (
-                <NavLink
-                  key={q}
-                  to={`/q${q}`}
-                  className={({ isActive }) =>
-                    `nav-link ${
-                      isActive ? "fw-bold text-danger" : "text-dark"
-                    }`
-                  }
-                >
-                  Q{q}
-                </NavLink>
-              ))}
-            </div>
-          </div>
+    <div className="q1-container">
+      <h2 className="q1-title">Question 2</h2>
+      <p className="q1-text">{questionText}</p>
+
+      {/* Run Code button always visible */}
+      <button className="run-btn" onClick={handleRunCodeClick}>
+        Run Code
+      </button>
+
+      {/* Terminal input */}
+      {step === 1 && (
+        <div className="terminal-input">
+          <span>Start N:</span>
+          <input
+            type="number"
+            value={startInput}
+            onChange={(e) => setStartInput(e.target.value)}
+          />
+          <button onClick={handleStartSubmit}>Submit</button>
         </div>
-      </nav>
+      )}
 
-      {/* Main Container */}
-      <div className="container-fluid flex-grow-1 my-4">
-        <div className="row h-100">
-          {/* Left: Question Box */}
-          <div className="col-12 col-lg-6 mb-4 mb-lg-0">
-            <div className="card shadow-lg border-0 h-100 rounded-4">
-              <div
-                className="card-header fw-bold text-dark"
-                style={{ background: "#f2c97d" }}
-              >
-                Question
-              </div>
-              <div className="card-body">
-                <h4 className="fw-bold text-dark mb-3">Question 2</h4>
-                <p className="lead text-muted">{questionText}</p>
-
-                {/* Input for Max Primes */}
-                <div className="mb-3">
-                  <label className="form-label fw-bold">
-                    Max Primes to Find
-                  </label>
-                  <input
-                    type="number"
-                    value={maxPrimes}
-                    onChange={(e) => setMaxPrimes(e.target.value)}
-                    className="form-control"
-                    min="1"
-                    max="20"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Code + Output */}
-          <div className="col-12 col-lg-6 d-flex flex-column">
-            {/* Code Box */}
-            <div className="card shadow-lg border-0 flex-fill mb-3 rounded-4">
-              <div
-                className="card-header fw-bold text-dark"
-                style={{ background: "#c9a563" }}
-              >
-                Code
-              </div>
-              <div className="card-body d-flex flex-column">
-                <pre
-                  style={{
-                    flexGrow: 1,
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    fontSize: "0.9rem",
-                    background: "#fffaf0",
-                    padding: "1rem",
-                    borderRadius: "8px",
-                  }}
-                >
-                  {pythonCode}
-                </pre>
-                <button
-                  className="btn mt-3 align-self-end"
-                  style={{
-                    background: "linear-gradient(145deg, #cb7d5f, #ae705a)",
-                    color: "#fffaf0",
-                    border: "none",
-                  }}
-                  onClick={runCode}
-                  disabled={loading}
-                >
-                  {loading ? "Running..." : "Run Code"}
-                </button>
-              </div>
-            </div>
-
-            {/* Output Box */}
-            <div className="card shadow-lg border-0 flex-fill rounded-4">
-              <div
-                className="card-header fw-bold text-dark"
-                style={{ background: "rgba(176, 137, 66, 1)" }}
-              >
-                Output
-              </div>
-              <div className="card-body">
-                {loading ? (
-                  <div className="d-flex align-items-center">
-                    <div
-                      className="spinner-border text-danger me-3"
-                      role="status"
-                    ></div>
-                    <span>Processing... ({time}s)</span>
-                  </div>
-                ) : output.length > 0 ? (
-                  <div
-                    style={{
-                      maxHeight: "500px",
-                      overflowY: "auto",
-                      scrollbarWidth: "none",
-                      msOverflowStyle: "none",
-                    }}
-                    className="hide-scrollbar"
-                  >
-                    {output.map((item, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          marginBottom: "0.5rem",
-                          padding: "0.5rem",
-                          background: "#fdf6e3",
-                          borderRadius: "6px",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        <strong>N = {item.N}</strong>: {item.repunit}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted">Click "Run Code" to see output.</p>
-                )}
-              </div>
-            </div>
-          </div>
+      {step === 2 && (
+        <div className="terminal-input">
+          <span>End N:</span>
+          <input
+            type="number"
+            value={endInput}
+            onChange={(e) => setEndInput(e.target.value)}
+          />
+          <button onClick={handleEndSubmit}>Submit</button>
         </div>
+      )}
+
+      {/* Terminal output */}
+      <div className="terminal-output">
+        {outputLines.map((line, idx) => (
+          <div key={idx}>{line}</div>
+        ))}
+        {loading && <div className="loading">⏳ Running... ({time}s)</div>}
       </div>
     </div>
   );
