@@ -43,7 +43,7 @@ function Q1() {
         if (data.found) {
           setOutputLines((prev) => [
             ...prev,
-            `%c✅ Found Kaprekar Prime n=${data.n}, number=${data.kaprekar_number}`,
+            `✅ Found Kaprekar Prime n=${data.n}, number=${data.kaprekar_number}`,
           ]);
           setLoading(false);
           setStep(0); // allow rerun
