@@ -35,18 +35,25 @@ def route_q3():
 # ================= Q4 =================
 @app.route("/q4")
 def route_q4():
-    start = request.args.get("start", default=2203, type=int)
-    end = request.args.get("end", default=2281, type=int)
-    count = request.args.get("count", default=4, type=int)
-    return jsonify({"output": questions.q4(start, end, count)})
-
+    p1 = request.args.get("start", default=2203, type=int)
+    p2 = request.args.get("end", default=2281, type=int)
+    count = request.args.get("count", default=None, type=int)  # optional count limit
+    
+    # Pass None if count is 0 or negative to disable count limit
+    count = count if count and count > 0 else None
+    
+    try:
+        result = questions.q4(p1, p2, max_count=count)
+        return jsonify({"output": result})
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
 
 # ================= Q5 =================
 @app.route("/q5")
 def route_q5():
-    min_digits = request.args.get("start_digits", default=20, type=int)
-    max_primes = request.args.get("max_primes", default=5, type=int)
-    return jsonify({"output": questions.generate_palindrome(min_digits, max_primes)})
+    min_digits = int(request.args.get("min_digits", 50))
+    max_primes = int(request.args.get("max_primes", 2))
+    return jsonify({"output": questions.q5(min_digits, max_primes)})
 
 
 # ================= Q6 =================

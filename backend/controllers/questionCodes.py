@@ -74,61 +74,87 @@ def q3(start: int, end: int):
 
 
 # ================= Q4 =================
-def q4(start: int = 2203, end: int = 2281, count: int = 4):
+def q4(p1: int = 2203, p2: int = 2281, max_count: int = None):
     """
-    Find 'count' primes greater than (2^start - 1)^2 until below (2^end - 1)^2.
-    Default: uses Q3 known exponents (2203, 2281).
+    Given two primes p1 and p2 (default 2203, 2281),
+    find all primes between p1^2 and p2^2.
+    If max_count is provided, return up to that many primes.
     """
-    num1 = (2**start - 1)**2
-    num2 = (2**end - 1)**2
-    result = []
-    prime_count = 0
-    n = num1
-
-    while prime_count < count and n < num2:
-        n = sympy.nextprime(n)
-        result.append({"prime": str(n)})
-        prime_count += 1
-
-    result.append({"message": f"At least {count} primes exist between given numbers"})
-    return result
-
-
-
+    if not (isprime(p1) and isprime(p2)):
+        raise ValueError("Both inputs must be prime numbers.")
+    if p1 >= p2:
+        raise ValueError("p1 must be less than p2.")
+    
+    start_sq = gmpy2.mpz(p1)**2
+    end_sq = gmpy2.mpz(p2)**2
+    
+    primes_found = []
+    current = gmpy2.next_prime(start_sq)
+    
+    while current < end_sq:
+        primes_found.append(int(current))
+        if max_count and len(primes_found) >= max_count:
+            break
+        current = gmpy2.next_prime(current)
+    
+    message = f"Found {len(primes_found)} primes between {start_sq} and {end_sq}."
+    
+    return {
+        "p1": p1,
+        "p2": p2,
+        "primes_between_squares": primes_found,
+        "message": message
+    }
+    
 # ================= Q5 =================
+import time
 from gmpy2 import mpz, is_prime
 
-def generate_palindrome(min_digits, max_primes):
-    result = []
-    prime_count = 0
-    length = min_digits  # <-- start exactly from given min_digits
+def generate_palindrome(length):
+    """
+    Generate all palindromes of a given length.
+    """
+    half = (length + 1) // 2
+    start = 10 ** (half - 1)
+    end = 10 ** half
+    for i in range(start, end):
+        s = str(i)
+        pal = s + s[-2::-1]  # construct palindrome
+        yield mpz(pal)
 
-    while prime_count < max_primes:
-        half_len = (length + 1) // 2
-        start = 10**(half_len - 1)
-        end = 10**half_len
+def q5(min_digits=50, max_primes=2):
+    """
+    Find palindromic primes starting from min_digits.
+    Automatically increases length if no prime found.
+    """
+    start_time = time.time()
+    length = min_digits if min_digits % 2 == 1 else min_digits + 1
+    found_primes = 0
+    results = []
 
-        for i in range(start, end):
-            s = str(i)
-            if length % 2 == 0:
-                # even-length palindrome
-                pal = s + s[::-1]
-            else:
-                # odd-length palindrome
-                pal = s + s[-2::-1]
-
-            if is_prime(mpz(pal)):
-                result.append({"palindromic_num": str(pal), "digits": len(pal)})
-                prime_count += 1
-                if prime_count >= max_primes:
+    while found_primes < max_primes:
+        found_in_this_length = False
+        for pal in generate_palindrome(length):
+            if is_prime(pal):
+                elapsed = round(time.time() - start_time, 2)
+                results.append({
+                    "palindromic_prime": str(pal),
+                    "digits": len(str(pal)),
+                    "runtime_seconds": elapsed
+                })
+                found_primes += 1
+                found_in_this_length = True
+                if found_primes >= max_primes:
                     break
 
-        length += 1  # ✅ move to next length (increment by 1, not +2)
+        if not found_in_this_length:
+            # no primes found in this length, move to next odd length
+            length += 2
+        else:
+            # move to next length anyway to find remaining primes
+            length += 2
 
-    return result
-
-
-
+    return results
 
 
 # ================= Q6 =================
