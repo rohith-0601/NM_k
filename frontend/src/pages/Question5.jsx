@@ -48,7 +48,7 @@ function Q5() {
           data.output.forEach((item) => {
             setOutputLines((prev) => [
               ...prev,
-              `(${item.digits} digits): ${item.palindromic_num}`,
+              `(${item.digits} digits): ${item.palindromic_prime}`,
             ]);
           });
         } else {

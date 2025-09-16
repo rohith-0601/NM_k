@@ -26,17 +26,15 @@ function Q4() {
 
   const handleStartSubmit = () => {
     if (!startInput) return;
-    setOutputLines((prev) => [...prev, `Start N = ${startInput}`]);
+    // Replace output, don't append
+    setOutputLines([`Start N = ${startInput}`]);
     setStep(2);
   };
 
   const handleEndSubmit = () => {
     if (!endInput) return;
-    setOutputLines((prev) => [
-      ...prev,
-      `End N = ${endInput}`,
-      "Running backend...",
-    ]);
+    // Replace output, don't append
+    setOutputLines([`Start N = ${startInput}`, `End N = ${endInput}`, "Running backend..."]);
     setStep(3);
     setLoading(true);
     setElapsedTime(0);
@@ -44,26 +42,31 @@ function Q4() {
     const s = Number(startInput);
     const e = Number(endInput);
 
-    fetch(`http://127.0.0.1:8000/q4?start=${s}&end=${e}`)
+    fetch(`http://127.0.0.1:8000/q4?start=${s}&end=${e}&count=4`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.output && data.output.length > 0) {
-          data.output.forEach((item) => {
-            if (item.prime) {
-              setOutputLines((prev) => [...prev, item.prime]);
-            } else if (item.message) {
-              setOutputLines((prev) => [...prev, item.message]);
-            }
-          });
+        if (data.output) {
+          const { primes_between_squares, message } = data.output;
+          if (primes_between_squares && primes_between_squares.length > 0) {
+            setOutputLines([
+              "Primes found between squares:",
+              ...primes_between_squares.map((p) => p.toString()),
+              message,
+            ]);
+          } else {
+            setOutputLines(["No primes found.", message]);
+          }
+        } else if (data.error) {
+          setOutputLines([`Error: ${data.error}`]);
         } else {
-          setOutputLines((prev) => [...prev, "No output found."]);
+          setOutputLines(["No output found."]);
         }
         setLoading(false);
         setStep(1); // allow rerun
       })
       .catch((err) => {
         console.error(err);
-        setOutputLines((prev) => [...prev, "❌ Error fetching data"]);
+        setOutputLines(["❌ Error fetching data"]);
         setLoading(false);
         setStep(1);
       });
@@ -73,7 +76,7 @@ function Q4() {
     <div className="q1-container">
       <h2 className="q1-title">Question 4</h2>
       <p className="q1-text">
-        Find at least 4 prime numbers between (2^N1 - 1)^2 and (2^N2 - 1)^2.
+        Brocard's Conjecture says for any consecutive primes greater than 3 has atleast 4 prime numbers in between their squares.So for (pn)^2 and (pn+1)^2 there are 4 primes in the range.Now enter your p1 and p2.
       </p>
 
       {/* Show Q3 outputs (hardcoded for now) */}
@@ -90,8 +93,7 @@ function Q4() {
       </div>
 
       {/* Run Code Button */}
-      <button className="run-btn" onClick={handleRunClick}
-      style={{margin:"2rem"}}>
+      <button className="run-btn" onClick={handleRunClick} style={{ margin: "2rem" }}>
         Run Code
       </button>
 

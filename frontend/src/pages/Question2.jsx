@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
 import axios from "axios";
 import "./Q1.css"; // reuse Q1 terminal-style CSS
 
@@ -10,8 +9,7 @@ function Q2() {
 
   const [startInput, setStartInput] = useState("");
   const [endInput, setEndInput] = useState("");
-  const [step, setStep] = useState(0); // 0 = show Run Code, 1 = ask start, 2 = ask end, 3 = running
-  const [outputData, setOutputData] = useState([]); // store axios output
+  const [step, setStep] = useState(0);
 
   useEffect(() => {
     let timer;
@@ -23,8 +21,9 @@ function Q2() {
 
   const handleRunCodeClick = () => {
     setStep(1);
-    setOutputLines(["Welcome to Q2 interactive session. Enter inputs below as prompted."]);
-    setOutputData([]);
+    setOutputLines([
+      "Welcome to Q2 interactive session. Enter inputs below as prompted.",
+    ]);
     setTime(0);
   };
 
@@ -35,35 +34,52 @@ function Q2() {
   };
 
   const handleEndSubmit = () => {
-  if (!endInput) return;
-  setOutputLines((prev) => [...prev, `End N = ${endInput}`, "Running backend..."]);
-  setStep(3);
-  setLoading(true);
+    if (!endInput) return;
+    setOutputLines((prev) => [
+      ...prev,
+      `End N = ${endInput}`,
+      "Running backend...",
+    ]);
+    setStep(3);
+    setLoading(true);
+    setTime(0);
 
-  const start = parseInt(startInput);
-  const end = parseInt(endInput);
+    const start = parseInt(startInput);
+    const end = parseInt(endInput);
 
-  axios
-    .get(`http://127.0.0.1:8000/q2?start=${start}&end=${end}`)
-    .then((res) => {
-      const outputArr = res.data.output || [];
-      setOutputData(outputArr);
-      setOutputLines((prev) => [
-        ...prev,
-        ...outputArr.map((item, idx) => {
-          const nValue = item.N ?? idx + start;
-          const repunit = item.repunit ?? item;
-          return `N = ${nValue}: ${repunit}`;
-        }),
-      ]);
-      setLoading(false);
-    })
-    .catch(() => {
-      setOutputLines((prev) => [...prev, "❌ Error fetching output"]);
-      setLoading(false);
-    });
-};
+    axios
+      .get(`http://127.0.0.1:8000/q2?start=${start}&end=${end}`)
+      .then((res) => {
+        const outputArr = res.data.output || [];
 
+        // Create map for fast lookup
+        const repunitMap = {};
+        outputArr.forEach((item) => {
+          repunitMap[item.N] = item.repunit;
+        });
+
+        // Iterate whole range, print repunit if found, else "No repunit found"
+        const lines = [];
+        for (let n = start; n <= end; n++) {
+          if (repunitMap[n]) {
+            lines.push(
+              `✅ N = ${n}: ${repunitMap[n]}` // bold + dark
+            );
+          } else {
+            lines.push(`N = ${n}: No repunit found`);
+          }
+        }
+
+        setOutputLines((prev) => [...prev, ...lines]);
+        setLoading(false);
+        setStep(0);
+      })
+      .catch(() => {
+        setOutputLines((prev) => [...prev, "❌ Error fetching output"]);
+        setLoading(false);
+        setStep(0);
+      });
+  };
 
   const questionText = `11 is prime, 111 is not prime. We use the notation 1N for N ones. 
 If N is prime, 1N might be prime. Determine the primes between N = 2 and N = 1040.`;
@@ -105,9 +121,18 @@ If N is prime, 1N might be prime. Determine the primes between N = 2 and N = 104
 
       {/* Terminal output */}
       <div className="terminal-output">
-        {outputLines.map((line, idx) => (
-          <div key={idx}>{line}</div>
-        ))}
+        {outputLines.map((line, idx) => {
+          const isFound = line.includes("✅");
+          return (
+            <div
+              key={idx}
+              className={isFound ? "found-prime" : "not-prime"}
+              style={isFound ? { fontWeight: "bold", color: "#222" } : {}}
+            >
+              {line}
+            </div>
+          );
+        })}
         {loading && <div className="loading">⏳ Running... ({time}s)</div>}
       </div>
     </div>

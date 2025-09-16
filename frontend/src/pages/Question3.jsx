@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Q3.css"; // Create CSS similar to Q1 for styling
+import "./Q3.css"; // styled similar to Q1/Q2
 import axios from "axios";
 
 function Q3() {
@@ -11,7 +11,9 @@ function Q3() {
 
   const handleRunCodeClick = () => {
     setStep(1);
-    setOutputLines(["Welcome to Q3 interactive session. Enter inputs as prompted."]);
+    setOutputLines([
+      "Welcome to Q3 interactive session. Enter inputs as prompted.",
+    ]);
   };
 
   const handleStartSubmit = () => {
@@ -22,7 +24,11 @@ function Q3() {
 
   const handleEndSubmit = () => {
     if (!endInput) return;
-    setOutputLines((prev) => [...prev, `End N = ${endInput}`, "Running backend..."]);
+    setOutputLines((prev) => [
+      ...prev,
+      `End N = ${endInput}`,
+      "Running backend...",
+    ]);
     setStep(3);
     setLoading(true);
 
@@ -33,19 +39,31 @@ function Q3() {
       .get(`http://127.0.0.1:8000/q3?start=${start}&end=${end}`)
       .then((res) => {
         const outputArr = res.data.output || [];
-        outputArr.forEach((item, idx) => {
-          const nValue = item.i ?? idx + start;
-          const mersenne = item.mersenne ?? item;
-          setOutputLines((prev) => [
-            ...prev,
-            `N = ${nValue}: ${mersenne}`
-          ]);
+
+        // Build a lookup map for Mersenne results
+        const mersenneMap = {};
+        outputArr.forEach((item) => {
+          mersenneMap[item.i] = item.mersenne;
         });
+
+        // Prepare output lines for full range
+        const lines = [];
+        for (let n = start; n <= end; n++) {
+          if (mersenneMap[n]) {
+            lines.push(`✅ N = ${n}: ${mersenneMap[n]} is a MERSENNE PRIME`);
+          } else {
+            lines.push(`N = ${n}: No Mersenne prime found`);
+          }
+        }
+
+        setOutputLines((prev) => [...prev, ...lines]);
         setLoading(false);
+        setStep(0);
       })
       .catch(() => {
         setOutputLines((prev) => [...prev, "❌ Error fetching output"]);
         setLoading(false);
+        setStep(0);
       });
   };
 
@@ -53,7 +71,8 @@ function Q3() {
     <div className="q3-container">
       <h2 className="q3-title">Question 3</h2>
       <p className="q3-text">
-        Find all Mersenne primes between 2^N - 1, where N ranges from 2201 to 2298 (inclusive).
+        Find all Mersenne primes between 2^N - 1, where N ranges from 2201 to
+        2298 (inclusive).
       </p>
 
       <button className="run-btn" onClick={handleRunCodeClick}>
@@ -85,9 +104,18 @@ function Q3() {
       )}
 
       <div className="terminal-output">
-        {outputLines.map((line, idx) => (
-          <div key={idx}>{line}</div>
-        ))}
+        {outputLines.map((line, idx) => {
+          const isFound = line.includes("✅");
+          return (
+            <div
+              key={idx}
+              className={isFound ? "found-prime" : "not-prime"}
+              style={isFound ? { fontWeight: "bold", color: "#222" } : {}}
+            >
+              {line}
+            </div>
+          );
+        })}
         {loading && <div className="loading">⏳ Running...</div>}
       </div>
     </div>
